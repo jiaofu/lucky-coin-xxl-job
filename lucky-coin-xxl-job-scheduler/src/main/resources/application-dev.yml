@@ -1,0 +1,110 @@
+# 测试环境配置
+spring:
+  application:
+    name: binance-mining-pool-xxl-job
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    idle-timeout: 600000
+    maximum-pool-size: 100
+    max-lifetime: 1800000
+    minimum-idle: 5
+  redis:
+    # Redis数据库索引（默认为0）,如果设置为1，那么存入的key-value都存放在select 1中
+    lettuce:
+      shutdown-timeout: 60000
+      pool:
+        #连接池最大连接数（使用负值表示没有限制）
+        max-active: 80
+        # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: 30000
+        # 连接池中的最大空闲连接
+        max-idle: 80
+        # 连接池中的最小空闲连接
+        min-idle: 50
+
+
+#mybatis驼峰字段映射
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    root: info
+    com:
+      company: debug
+  path: ./logs
+
+xxl:
+  job:
+    admin:
+      # ### xxl-job admin address list, such as "http://address" or "http://address01,http://address02"
+      ### 调度中心部署根地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
+      addresses: https://nkp-dev-schedule-job.pdevhesp.net/xxl-job-admin
+      #### ### 执行器通讯TOKEN [选填]：非空时启用；
+    ### accessToken: default_token
+    executor:
+      ### 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册
+      appname: xxl-job-executor-sample
+      ## 执行器注册 [选填]：优先使用该配置作为注册地址，为空时使用内嵌服务 ”IP:PORT“ 作为注册地址。从而更灵活的支持容器类型执行器动态IP和动态映射端口问题。
+      address:
+      ### 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，该IP不会绑定Host仅作为通讯实用；地址信息用于 "执行器注册" 和 "调度中心请求并触发任务"；
+      ip:
+      ### 执行器端口号 [选填]：小于等于0则自动获取；默认端口为9999，单机部署多个执行器时，注意要配置不同执行器端口；
+      port: 999
+      ### ### 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
+      logpath: ./data/applogs/xxl-job/jobhandler
+      ## 执行器日志文件保存天数 [选填] ： 过期日志自动清理, 限制值大于等于3时生效; 否则, 如-1, 关闭自动清理功能；
+      logretentiondays: 30
+pool:
+  security:
+    name:
+      #矿池业务库
+      db1:
+        # securityName
+        - nkp-dev-tk-aws-pool-db-pw
+        # securityRegion
+        - ap-northeast-1
+      #矿池业务库读库
+      dbRead:
+        # securityName
+        - nkp-dev-tk-aws-pool-db-pw
+        # securityRegion
+        - ap-northeast-1
+      #redis配置
+      redis:
+        - nkp-dev-tk-aws-webapi-redis-key
+        - ap-northeast-1
+      #accessToken
+      accessToken:
+        - nkp-dev-tk-aws-xxl-job-key
+        - ap-northeast-1
+      #dbsecre配置
+      dbSecretkey:
+        - nkp-dev-tk-dbrecordcheck-key
+        - ap-northeast-1
+      blockChairKey:
+        - nkp-dev-tk-bitcoin-block-explorer-api-key
+        - ap-northeast-1
+      tokenViewKey:
+        - nkp-dev-tk-token-view-explorer-api-key
+        - ap-northeast-1
+      #btc节点配置
+      btcd:
+        - nkp-dev-tk-aws-bitcoindrpc-key
+        - ap-northeast-1
+      # zts（nkp） 的密钥
+      ztsApiKey:
+        - nkp-dev-tk-zts-api-key
+        - ap-northeast-1
+      botSecret:
+        - nkp-dev-tk-wea-notify-bot-key
+        - ap-northeast-1
+  # 是否是线上的请求 0 是测试还
+  onlineTest: 0
+  domain: http://bp-dev-zts.awsbnbpool.internal
+  bot:
+    apiBase: https://openapi.test.difft.org
+    botID: "+21006"
+
+

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.lucky.coin.xxl.job</groupId>
+        <artifactId>lucky-coin-xxl-job</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>lucky-coin-xxl-job-service</artifactId>
+    <groupId>com.lucky.coin.xxl.job</groupId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.lucky.coin.xxl.job</groupId>
+            <artifactId>lucky-coin-xxl-job-dao</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.binance.pool</groupId>
+            <artifactId>mining-sub-pool-config</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+    </dependencies>
+
+</project>
