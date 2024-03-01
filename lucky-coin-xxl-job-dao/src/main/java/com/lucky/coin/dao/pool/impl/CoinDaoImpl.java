@@ -1,8 +1,6 @@
 package com.lucky.coin.dao.pool.impl;
 
-import com.lucky.coin.dao.bean.PoolAlgoBean;
 import com.lucky.coin.dao.bean.PoolCoinBean;
-import com.lucky.coin.dao.bean.PoolCoinHashInfoBean;
 import com.lucky.coin.dao.config.DBAnno;
 import com.lucky.coin.dao.mapper.CoinMapper;
 import com.lucky.coin.dao.pool.CoinDao;
