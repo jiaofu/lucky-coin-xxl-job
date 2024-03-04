@@ -9,6 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = LuckyCoinXxlJobApplication.class)
@@ -21,8 +24,15 @@ public class EveryTest {
 
     @Test
     public void baseCoin(){
-        String yBase ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,rndr,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,map,cqt,gns,trias,ator,wifi,equ,dnx,zkf";
+        String yBaseStr ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,rndr,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,map,cqt,gns,trias,ator,wifi,equ,dnx,zkf,ton";
+        List<String> baseCoins =  Arrays.stream(yBaseStr.split(",")).collect(Collectors.toList());
 
+        baseCoins.add("pepe");
+        baseCoins.add("sys");
+        baseCoins.add("crv");
+
+
+        String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }
 

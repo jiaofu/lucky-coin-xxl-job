@@ -1,10 +1,10 @@
-/*
 import com.alibaba.fastjson.JSON;
 import com.lucky.coin.LuckyCoinXxlJobApplication;
 import com.lucky.coin.dao.bean.PoolCoinBean;
 
 import com.lucky.coin.dao.pool.CoinDao;
 import com.lucky.coin.service.market.CollectionInfo;
+import com.lucky.coin.service.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,8 +69,8 @@ public class StartTest {
         String Y20240228 ="nos,ar,flux,metis,ilv,akt,pyth,grt,rndr,olas,rune,inj,bnb,map,fet,btc,bigtime,eth,dnx,zeta,shrap,wifi,ldo,iotx,stx,sats,avax,naka,cqt,wemix,sol,api3,equ,okb,tao,ator,xai,op,imx,sei,alt,arb,zkf,mask,gns,sui,tia,kas,lpt,trias,magic,ron";
 
 
-        //collectionInfo.initMarketHistory(y20231219,20231219L);
-      //  collectionInfo.initMarketHistory(y20240104,20240104L);
+        collectionInfo.initMarketHistory(y20231219,20231219L);
+        collectionInfo.initMarketHistory(y20240104,20240104L);
         collectionInfo.initMarketHistory(y20240110,20240110L);
         collectionInfo.initMarketHistory(y20240111,20240111L);
         collectionInfo.initMarketHistory(y20240118,20240118L);
@@ -90,5 +90,20 @@ public class StartTest {
 
 
     }
+
+    @Test
+    public void initMarketDbTwo(){
+
+        Long start = 20240301L;
+        Long end  = DateUtil.getMinerDayBefore(1);
+        while (start <=end){
+            log.info("  initMarketDbTwo start : {}  ",start);
+            collectionInfo.initMarketHistory(start);
+            start = DateUtil.getAfterDay(start,1);
+
+        }
+        log.info(" 完成");
+
+    }
+
 }
-*/

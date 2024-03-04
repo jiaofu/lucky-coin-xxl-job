@@ -28,10 +28,20 @@ public class MarketInfoDaoImpl implements MarketInfoDao {
     }
 
     @Override
-    public List<MarketInfoBean> getAll() {
+    public List<MarketInfoBean> getByDay(Long day) {
         Example example = new Example(MarketInfoBean.class);
         Example.Criteria criteria = example.createCriteria();
 
+        criteria.andEqualTo("day",day);
+        return mapper.selectByExample(example);
+    }
+
+    @Override
+    public List<MarketInfoBean> getAll(Long day) {
+        Example example = new Example(MarketInfoBean.class);
+        Example.Criteria criteria = example.createCriteria();
+
+        criteria.andLessThanOrEqualTo("day",day);
         return mapper.selectByExample(example);
     }
 }

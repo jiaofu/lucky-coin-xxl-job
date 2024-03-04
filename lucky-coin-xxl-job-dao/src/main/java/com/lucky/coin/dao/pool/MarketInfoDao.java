@@ -7,6 +7,8 @@ import java.util.List;
 public interface MarketInfoDao {
     Integer batchInsert(List<MarketInfoBean> beans);
 
-    List<MarketInfoBean> getAll();
+    List<MarketInfoBean> getAll(Long day);
 
+
+    List<MarketInfoBean> getByDay(Long day);
 }

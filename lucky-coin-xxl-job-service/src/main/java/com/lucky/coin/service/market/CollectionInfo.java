@@ -24,4 +24,11 @@ public interface CollectionInfo {
       * @param day
       */
      void initMarketHistory(String symbols,Long day);
+
+
+     /**
+      * 初始化
+      * @param day
+      */
+     void initMarketHistory(Long day);
 }

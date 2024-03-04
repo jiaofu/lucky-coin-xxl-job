@@ -64,7 +64,7 @@ public class CollectionInfoImpl implements CollectionInfo {
     @Override
     public void getEveryCoinScore() {
         Long day = DateUtil.getMinerDayBefore(0);
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll();
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll(day);
         if(marketInfoBeans.stream().filter(q->q.getDay()-day==0).count()>0){
             log.error("  getEveryCoinScore 今日的数据已经获取到了  day : {}",day);
             writeSymbol(marketInfoBeans,day);
@@ -76,7 +76,8 @@ public class CollectionInfoImpl implements CollectionInfo {
         List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(getSymbols);
         initMarketRank(marketCapVos,day);
         handleCoinScoreByDay(marketCapVos,day);
-        writeSymbol(marketInfoBeans,day);
+        List<MarketInfoBean> dayMarketInfoBeans = marketInfoDao.getAll(day);
+        writeSymbol(dayMarketInfoBeans,day);
     }
 
     /**
@@ -100,7 +101,8 @@ public class CollectionInfoImpl implements CollectionInfo {
         for( CoinRankVo vo :    coinRankVos){
             sb .append( JSON.toJSON(vo) + "\n\r ");
         }
-        log.info("  writeSymbol : \n\r {}  排序总币种数量:{}   ", sb,coinRankVos.size());
+
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}   ", sb.toString(),day,coinRankVos.size());
 
     }
 
@@ -113,7 +115,7 @@ public class CollectionInfoImpl implements CollectionInfo {
     public void  handleCoinScoreByDay( List<CoinFullyDilutedMarketCapVo> marketCapVos,Long day){
 
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll();
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll(day);
 
         /**
          * 从7d 行情大到小的排序
@@ -121,6 +123,8 @@ public class CollectionInfoImpl implements CollectionInfo {
         List<CoinFullyDilutedMarketCapVo> sore =  marketCapVos.stream().sorted((o1,o2) ->o2.getPercentChange7d() .compareTo(o1.getPercentChange7d())).collect(Collectors.toList());
 
         List<String> lastSymbols = sore.stream().map(q->q.getSymbol()).collect(Collectors.toList());
+
+        log.info(" handleCoinScoreByDay @@@@@@@@@@@@@@  7d 行情大到小的排序  : {}",JSON.toJSONString(lastSymbols));
         List<String> baseSymbols = coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
 
         List<String> duplicatesList = lastSymbols.stream()
@@ -136,7 +140,10 @@ public class CollectionInfoImpl implements CollectionInfo {
             return;
         }
 
-        Map<String,Long>   rankMarketMap =  coinInfoBeans.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking()));
+        /**
+         * 获取排名，用于，如果在没有获得排名。根据这些获取初始化排名
+         */
+       Map<String,Long>   rankMarketMap =  coinInfoBeans.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking()));
 
         Map<String,Long>   rankMap =  getCoinRank(lastSymbols,baseSymbols);
 
@@ -242,7 +249,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
                 //
                 vo.setPrice(currency.getPrice());
-                vo.setPercentChange7d(currency.getPercent_change_24h());
+                vo.setPercentChange7d(currency.getPercent_change_7d());
                 vo.setPercentChange30d(currency.getPercent_change_30d());
                 vo.setPercentChange24h(currency.getPercent_change_24h());
 
@@ -267,7 +274,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         symbols = symbols.toUpperCase();
 
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll();
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll(day);
         List<String> baseSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
         List<String> lastSymbols = Arrays.stream(symbols.split(",")).collect(Collectors.toList());
         for( String str :     lastSymbols){
@@ -326,6 +333,18 @@ public class CollectionInfoImpl implements CollectionInfo {
         Integer batchNum = marketInfoDao.batchInsert(list);
         log.info("  initMarketHistory   day :{}  batchNum : {} ",day,batchNum);
     }
+
+    @Override
+    public void initMarketHistory(Long day) {
+        if(day < 20240301L){
+            log.error(" initMarketHistory 初始化程序 错误 ");
+        }
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getByDay(day);
+        String  markCoin =  marketInfoBeans.stream().sorted((o1,o2) ->o1.getCoinRanking().compareTo(o2.getCoinRanking())).map(q->q.getSymbol()).collect(Collectors.joining(","));
+        log.info(" initMarketHistory 获取的数据 ： {}  ",markCoin);
+        initMarketHistory(markCoin,day);
+    }
+
     private MarketInfoBean getInitMarketInfoBean(CoinInfoBean coinInfoBean,Long day){
         MarketInfoBean marketInfoBean = MarketInfoBean.builder()
                 .coinId(coinInfoBean.getId())
@@ -396,7 +415,8 @@ public class CollectionInfoImpl implements CollectionInfo {
 
                 Long rank =   entryMap.get(baseName);
                 if(rank == null){
-                    rank   = map.get("BTC");
+                    // 获取当天btc的数据
+                    rank   = entryMap.get("BTC");
                 }
 
                 Long value = map.get(baseName);
