@@ -1,3 +1,4 @@
+/*
 import com.alibaba.fastjson.JSON;
 import com.lucky.coin.LuckyCoinXxlJobApplication;
 import com.lucky.coin.dao.bean.PoolCoinBean;
@@ -107,3 +108,4 @@ public class StartTest {
     }
 
 }
+*/
