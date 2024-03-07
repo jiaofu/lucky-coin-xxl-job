@@ -33,7 +33,7 @@ public class EveryTest {
         baseCoins.add("gala");
         baseCoins.add("hnt");
         baseCoins.add("ace");
-
+        baseCoins.add("near");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }

@@ -13,6 +13,7 @@ import com.lucky.coin.service.vo.http.CoinFullyDilutedMarketCapVo;
 import com.lucky.coin.service.vo.http.CoinValueVo;
 import com.lucky.coin.service.vo.http.CoinmarketcapCoinInfoVo;
 import com.lucky.coin.service.vo.http.Currency;
+import com.lucky.coin.service.vo.market.CoinAllInfoVo;
 import com.lucky.coin.service.vo.market.CoinRankFeeVo;
 import com.lucky.coin.service.vo.market.CoinRankVo;
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +71,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
         if(marketInfoBeans.stream().filter(q->q.getDay()-day==0).count()>0){
             log.error("  getEveryCoinScore 今日的数据已经获取到了  day : {}",day);
-            writeSymbolScore(marketInfoBeans,day);
-            writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
+            writeSymbol(day,marketInfoBeans,coinInfoBeans);
             return;
         }
 
@@ -80,9 +80,22 @@ public class CollectionInfoImpl implements CollectionInfo {
         List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(getSymbols);
         initMarketRank(marketCapVos,day);
         handleCoinScoreByDay(marketCapVos,day);
-        List<MarketInfoBean> dayMarketInfoBeans = marketInfoDao.getAll(day);
-        writeSymbolScore(dayMarketInfoBeans,day);
-        writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
+        marketInfoBeans = marketInfoDao.getAll(day);
+
+
+        writeSymbol(day,marketInfoBeans,coinInfoBeans);
+    }
+
+    /**
+     * 数据写的方法
+     * @param day
+     * @param marketInfoBeans
+     * @param coinInfoBeans
+     */
+    private void writeSymbol(  Long day, List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans){
+        writeSymbolScore(marketInfoBeans,day);
+        List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
+        writeSymbolAll(rankFeeVos,marketInfoBeans,day);
     }
 
     /**
@@ -105,7 +118,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         StringBuilder sb = new StringBuilder();
 
         for( CoinRankVo vo :    coinRankVos){
-            sb .append( JSON.toJSON(vo) + "\n\r ");
+            sb .append( JSON.toJSONString(vo) + "\n\r ");
         }
         log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", sb.toString(),day,coinRankVos.size());
         Integer topCoinList =  coinRankVos.size()/14 *13;
@@ -114,7 +127,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         StringBuilder wasterSb = new StringBuilder();
         wasterSb.append(" 垃圾币种 ");
         for( CoinRankVo vo :    wasteCoin){
-            wasterSb .append( JSON.toJSON(vo) + "\n\r ");
+            wasterSb .append( JSON.toJSONString(vo) + "\n\r ");
         }
         log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", wasterSb.toString(),day,wasteCoin.size());
     }
@@ -125,7 +138,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param coinInfoBeans
      * @param dayNow
      */
-    private void writeSymbolRankFee( List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans,Long dayNow ){
+    private  List<CoinRankFeeVo>  writeSymbolRankFee( List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans,Long dayNow ){
        Map<Long,List<MarketInfoBean>>  map = marketInfoBeans.stream().collect(Collectors.groupingBy(q->q.getDay()));
        // 8条数据， 第一条数据用户初始化，其他的7条数据用户计算速率
        List<Long> days =  map.entrySet().stream().map(q->q.getKey()).sorted(((o1, o2) -> o1.compareTo(o2))).skip(map.size()-8).collect(Collectors.toList());
@@ -184,9 +197,55 @@ public class CollectionInfoImpl implements CollectionInfo {
         StringBuilder sb = new StringBuilder();
 
         for( CoinRankFeeVo vo :    soreResult){
-            sb .append( JSON.toJSON(vo) + "\n\r ");
+            sb .append( JSON.toJSONString(vo) + "\n\r ");
         }
-        log.info("  feeSoreSymbol : \n\r {}  day :{}  币种数量:{}  \n\r  ", sb.toString(),dayNow,soreResult.size());
+        log.info("  feeSoreSymbol : \n\r {}  day :{}  币种数量:{}   \n\r  ", sb.toString(),dayNow,soreResult.size());
+
+        return soreResult;
+    }
+
+    /**
+     * 数据最后写出
+     * @param rankFeeVos
+     * @param marketInfoBeans
+     * @param day
+     */
+    private void  writeSymbolAll( List<CoinRankFeeVo> rankFeeVos, List<MarketInfoBean> marketInfoBeans,Long day  ){
+
+        List<CoinAllInfoVo> coinAllInfoVos =  marketInfoBeans.stream().filter(q->q.getDay()-day ==0)
+                .map(q->{
+                    CoinAllInfoVo coinRankVo = new CoinAllInfoVo();
+                    coinRankVo.setSymbol(q.getSymbol());
+                    coinRankVo.setFee(0L);
+                    coinRankVo.setCoinScore(q.getCoinScore());
+                    return coinRankVo;
+                }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
+
+        Integer topCoinList =  coinAllInfoVos.size()/14 *13;
+        List<CoinAllInfoVo> wasteCoin =  coinAllInfoVos.stream().skip(topCoinList).collect(Collectors.toList());
+
+
+        Map<String,Long> rankMap =  rankFeeVos.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getFee()));
+        for(CoinAllInfoVo vo :    coinAllInfoVos){
+            Long fee = rankMap.get(vo.getSymbol());
+            if(fee ==null){
+                continue;
+            }
+            vo.setFee(fee);
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for( CoinAllInfoVo vo :    coinAllInfoVos){
+            sb .append( JSON.toJSONString(vo) + "\n\r ");
+        }
+        sb.append(" \n\r \n\r ");
+        sb.append(" 垃圾币种 \n\r");
+        for( CoinAllInfoVo vo :    wasteCoin){
+            sb .append( JSON.toJSONString(vo) + "\n\r ");
+        }
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  垃圾币种的数量 : {}  \n\r  ", sb.toString(),day,coinAllInfoVos.size(),wasteCoin.size());
+
 
     }
 
