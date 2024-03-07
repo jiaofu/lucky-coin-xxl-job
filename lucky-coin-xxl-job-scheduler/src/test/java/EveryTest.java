@@ -30,7 +30,9 @@ public class EveryTest {
         baseCoins.add("pepe");
         baseCoins.add("sys");
         baseCoins.add("crv");
-
+        baseCoins.add("gala");
+        baseCoins.add("hnt");
+        baseCoins.add("ace");
 
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);

@@ -13,6 +13,7 @@ import com.lucky.coin.service.vo.http.CoinFullyDilutedMarketCapVo;
 import com.lucky.coin.service.vo.http.CoinValueVo;
 import com.lucky.coin.service.vo.http.CoinmarketcapCoinInfoVo;
 import com.lucky.coin.service.vo.http.Currency;
+import com.lucky.coin.service.vo.market.CoinRankFeeVo;
 import com.lucky.coin.service.vo.market.CoinRankVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,19 +67,22 @@ public class CollectionInfoImpl implements CollectionInfo {
     public void getEveryCoinScore() {
         Long day = DateUtil.getMinerDayBefore(0);
         List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll(day);
+        List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
         if(marketInfoBeans.stream().filter(q->q.getDay()-day==0).count()>0){
             log.error("  getEveryCoinScore 今日的数据已经获取到了  day : {}",day);
-            writeSymbol(marketInfoBeans,day);
+            writeSymbolScore(marketInfoBeans,day);
+            writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
             return;
         }
-        List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
+
 
         List<String> getSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
         List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(getSymbols);
         initMarketRank(marketCapVos,day);
         handleCoinScoreByDay(marketCapVos,day);
         List<MarketInfoBean> dayMarketInfoBeans = marketInfoDao.getAll(day);
-        writeSymbol(dayMarketInfoBeans,day);
+        writeSymbolScore(dayMarketInfoBeans,day);
+        writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
     }
 
     /**
@@ -85,7 +90,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param marketInfoBeans
      * @param day
      */
-    private void writeSymbol( List<MarketInfoBean> marketInfoBeans,Long day){
+    private void writeSymbolScore( List<MarketInfoBean> marketInfoBeans,Long day){
         List<CoinRankVo> coinRankVos =  marketInfoBeans.stream().filter(q->q.getDay()-day ==0)
                 .map(q->{
                     CoinRankVo coinRankVo = CoinRankVo.builder()
@@ -96,17 +101,105 @@ public class CollectionInfoImpl implements CollectionInfo {
                 }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
 
 
+
         StringBuilder sb = new StringBuilder();
 
         for( CoinRankVo vo :    coinRankVos){
             sb .append( JSON.toJSON(vo) + "\n\r ");
         }
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", sb.toString(),day,coinRankVos.size());
+        Integer topCoinList =  coinRankVos.size()/14 *13;
+        List<CoinRankVo> wasteCoin =  coinRankVos.stream().skip(topCoinList).collect(Collectors.toList());
 
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}   ", sb.toString(),day,coinRankVos.size());
+        StringBuilder wasterSb = new StringBuilder();
+        wasterSb.append(" 垃圾币种 ");
+        for( CoinRankVo vo :    wasteCoin){
+            wasterSb .append( JSON.toJSON(vo) + "\n\r ");
+        }
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", wasterSb.toString(),day,wasteCoin.size());
+    }
+
+    /**
+     * 获取币种的进步速度
+     * @param marketInfoBeans
+     * @param coinInfoBeans
+     * @param dayNow
+     */
+    private void writeSymbolRankFee( List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans,Long dayNow ){
+       Map<Long,List<MarketInfoBean>>  map = marketInfoBeans.stream().collect(Collectors.groupingBy(q->q.getDay()));
+       // 8条数据， 第一条数据用户初始化，其他的7条数据用户计算速率
+       List<Long> days =  map.entrySet().stream().map(q->q.getKey()).sorted(((o1, o2) -> o1.compareTo(o2))).skip(map.size()-8).collect(Collectors.toList());
+
+       Map<String,List<Long>> mapRank = new HashMap<>();
+
+       List<CoinRankFeeVo> result = new ArrayList<>();
+       for( Long day :   days){
+           List<MarketInfoBean> marketInfoBeanList = map.get(day);
+
+           Map<String,MarketInfoBean> marketRankByDay = marketInfoBeanList.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t));
+            for(CoinInfoBean coinInfoBean :  coinInfoBeans){
+                MarketInfoBean bean =   marketRankByDay.get(coinInfoBean.getSymbol());
+
+                if(bean == null){
+                    bean = marketRankByDay.get("BTC");
+                }
+                List<Long> listRank =  mapRank.get(coinInfoBean.getSymbol());
+                if(listRank == null){
+                    listRank = new ArrayList<>();
+                }
+                listRank.add(bean.getCoinRanking());
+                mapRank.put(coinInfoBean.getSymbol(),listRank);
+
+            }
+       }
+        // 获取速率
+        for(   Map.Entry<String,List<Long>>  entity :   mapRank.entrySet()){
+            String symbol = entity.getKey();
+            List<Long> ranks = entity.getValue();
+            Long lastRank = null;
+            Long fee = 0L;
+            for( Long ra :   ranks){
+                if(lastRank == null){
+                    lastRank = ra;
+                    continue;
+                }
+                // 排名越小越好，所以是这次减去上次 ，然后取负值
+                Long feeByDay = -(ra - lastRank);
+                fee = feeByDay +fee;
+
+                // 把上次数据给变量，用户计算
+                lastRank = ra;
+            }
+            CoinRankFeeVo vo = CoinRankFeeVo.builder()
+                    .fee(fee)
+                    .symbol(symbol)
+                    .build();
+            result.add(vo);
+        }
+
+        // 进步越大越好
+        List<CoinRankFeeVo> soreResult =    result.stream().sorted((o1,o2)->o2.getFee().compareTo(o1.getFee())).collect(Collectors.toList());
+
+
+        StringBuilder sb = new StringBuilder();
+
+        for( CoinRankFeeVo vo :    soreResult){
+            sb .append( JSON.toJSON(vo) + "\n\r ");
+        }
+        log.info("  feeSoreSymbol : \n\r {}  day :{}  币种数量:{}  \n\r  ", sb.toString(),dayNow,soreResult.size());
 
     }
 
+    public static void main(String[] args) {
+        int[] nums = {1, 6, 10, 27, 34, 58, 54, 5};
+        int totalDifference = 0;
 
+        for (int i = 0; i < nums.length - 1; i++) {
+            int difference = nums[i] - nums[i + 1];
+            totalDifference += difference;
+        }
+        System.out.println("The total difference is " + totalDifference);
+    }
     /**
      * 处理每日的线上数据
      * @param marketCapVos
