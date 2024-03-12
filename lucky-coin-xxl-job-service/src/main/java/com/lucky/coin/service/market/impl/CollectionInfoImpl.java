@@ -93,7 +93,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param coinInfoBeans
      */
     private void writeSymbol(  Long day, List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans){
-        writeSymbolScore(marketInfoBeans,day);
+      //  writeSymbolScore(marketInfoBeans,day);
         List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
         writeSymbolAll(rankFeeVos,marketInfoBeans,day);
     }
@@ -199,7 +199,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         for( CoinRankFeeVo vo :    soreResult){
             sb .append( JSON.toJSONString(vo) + "\n\r ");
         }
-        log.info("  feeSoreSymbol : \n\r {}  day :{}  币种数量:{}   \n\r  ", sb.toString(),dayNow,soreResult.size());
+      //  log.info("  feeSoreSymbol : \n\r {}  day :{}  币种数量:{}   \n\r  ", sb.toString(),dayNow,soreResult.size());
 
         return soreResult;
     }
@@ -216,35 +216,61 @@ public class CollectionInfoImpl implements CollectionInfo {
                 .map(q->{
                     CoinAllInfoVo coinRankVo = new CoinAllInfoVo();
                     coinRankVo.setSymbol(q.getSymbol());
-                    coinRankVo.setFee(0L);
+                    coinRankVo.setWeekUpFee(0L);
                     coinRankVo.setCoinScore(q.getCoinScore());
                     return coinRankVo;
                 }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
 
-        Integer topCoinList =  coinAllInfoVos.size()/14 *13;
-        List<CoinAllInfoVo> wasteCoin =  coinAllInfoVos.stream().skip(topCoinList).collect(Collectors.toList());
-
 
         Map<String,Long> rankMap =  rankFeeVos.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getFee()));
+
+        Long perScore = (  coinAllInfoVos.get(coinAllInfoVos.size()-1).getCoinScore() -coinAllInfoVos.get(0).getCoinScore()) /
+                (coinAllInfoVos.size());
         for(CoinAllInfoVo vo :    coinAllInfoVos){
             Long fee = rankMap.get(vo.getSymbol());
             if(fee ==null){
                 continue;
             }
-            vo.setFee(fee);
+            vo.setWeekUpFee(fee);
+            Long coinAllInfoVo =  new Double( vo.getCoinScore()*0.6 +  (perScore*coinAllInfoVos.size() - (fee*perScore))*0.4 ).longValue();
+            vo.setFeeAddScore(coinAllInfoVo);
         }
-
+        Integer topCoinList =  coinAllInfoVos.size()/14 *13;
         StringBuilder sb = new StringBuilder();
 
-        for( CoinAllInfoVo vo :    coinAllInfoVos){
-            sb .append( JSON.toJSONString(vo) + "\n\r ");
-        }
+//        Integer countScore = 0;
+//        sb.append(" score+fee \n\r \n\r");
+//        for( CoinAllInfoVo vo :    coinAllInfoVos){
+//            countScore++;
+//
+//            if(countScore==topCoinList){
+//                sb.append(" 垃圾币种 \n\r \n\r");
+//            }
+//            sb .append( JSON.toJSONString(vo) + "\n\r ");
+//        }
+//        sb.append(" score+fee 排序  ");
+//        sb.append(" day  "+day);
+//        sb.append("   \n\r");
+
+
+        List<CoinAllInfoVo> feeAddScoreList =  coinAllInfoVos.stream().
+        sorted((o1,o2)->(o1.getFeeAddScore().compareTo(o2.getFeeAddScore()))).collect(Collectors.toList());
+
+
         sb.append(" \n\r \n\r ");
-        sb.append(" 垃圾币种 \n\r");
-        for( CoinAllInfoVo vo :    wasteCoin){
+
+        Integer count = 0;
+        for( CoinAllInfoVo vo :    feeAddScoreList){
+            count++;
+
+
+            if(count==topCoinList){
+                sb.append(" 垃圾币种 \n\r \n\r");
+            }
+
             sb .append( JSON.toJSONString(vo) + "\n\r ");
         }
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  垃圾币种的数量 : {}  \n\r  ", sb.toString(),day,coinAllInfoVos.size(),wasteCoin.size());
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}     \n\r  ", sb.toString(),day,coinAllInfoVos.size());
 
 
     }
@@ -348,8 +374,10 @@ public class CollectionInfoImpl implements CollectionInfo {
         log.info(" initMarketRank @@@@ 市值 排序   {} ",initCoins.stream().collect(Collectors.joining(",")));
 
         List<CoinInfoBean> list = new ArrayList<>();
-        Integer rankCount = sore.size() ;
+
+        Long marketCapRank = 1L;
         for(CoinFullyDilutedMarketCapVo vo : sore){
+            Long rankCount = new Long(sore.size()) -marketCapRank;
             CoinInfoBean coinInfoBean = CoinInfoBean.builder()
                     .day(day)
                     .symbol(vo.getSymbol())
@@ -357,12 +385,15 @@ public class CollectionInfoImpl implements CollectionInfo {
                     .slug(vo.getSlug())
                     .marketId(vo.getMarketId())
                     .maxSupply(vo.getMaxSupply())
+
                     .totalSupply(vo.getTotalSupply())
                     .fullyDilutedMarketCap(vo.getFullyDilutedMarketCap())
-                    .coinRanking(new Long( rankCount))
+                    .coinRanking( rankCount)
+                    .marketCapRank(marketCapRank)
                     .build();
 
-            rankCount = rankCount -1;
+            marketCapRank ++ ;
+
             list.add(coinInfoBean);
         }
 

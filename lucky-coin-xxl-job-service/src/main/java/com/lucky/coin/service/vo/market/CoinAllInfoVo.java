@@ -20,5 +20,9 @@ public class CoinAllInfoVo {
     @JSONField(ordinal = 2)
     private Long coinScore;// '得分',
     @JSONField(ordinal = 3)
-    private Long fee;// '排名速率',
+    private Long weekUpFee;// '排名速率',
+
+
+    @JSONField(ordinal = 4)
+    private Long feeAddScore;//
 }

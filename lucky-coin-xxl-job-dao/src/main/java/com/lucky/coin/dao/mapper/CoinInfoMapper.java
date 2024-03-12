@@ -13,13 +13,13 @@ public interface CoinInfoMapper extends tk.mybatis.mapper.common.Mapper<CoinInfo
     @Insert({
             "<script>",
             "INSERT INTO coin_info(",
-            " `day`, `symbol`, `slug`, `name`, `market_id`, `max_supply`, `total_supply`,`fully_diluted_market_cap`,`coin_ranking`) VALUES ",
+            " `day`, `symbol`, `slug`, `name`, `market_id`, `max_supply`, `total_supply`,`fully_diluted_market_cap`,`coin_ranking`,`market_cap_rank`) VALUES ",
 
             "<foreach collection=\"recordList\"  index=\"index\" item=\"record\" separator=\",\"> ",
             "(#{record.day,jdbcType=BIGINT},#{record.symbol,jdbcType=VARCHAR},#{record.slug,jdbcType=VARCHAR},",
             "#{record.name,jdbcType=VARCHAR},#{record.marketId,jdbcType=BIGINT},",
             "#{record.maxSupply,jdbcType=DECIMAL},#{record.totalSupply,jdbcType=DECIMAL},#{record.fullyDilutedMarketCap,jdbcType=DECIMAL}," ,
-                    "#{record.coinRanking,jdbcType=BIGINT})",
+                    "#{record.coinRanking,jdbcType=BIGINT},#{record.marketCapRank,jdbcType=BIGINT})",
             "</foreach>",
 
             " ON DUPLICATE KEY UPDATE ",
@@ -30,6 +30,7 @@ public interface CoinInfoMapper extends tk.mybatis.mapper.common.Mapper<CoinInfo
                     "max_supply=VALUES(max_supply)," ,
                     "total_supply=VALUES(total_supply),",
             "coin_ranking=VALUES(coin_ranking),",
+            "market_cap_rank=VALUES(market_cap_rank),",
             "fully_diluted_market_cap=VALUES(fully_diluted_market_cap)",
             "</script>"
     })

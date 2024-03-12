@@ -15,7 +15,7 @@ CREATE TABLE `coin_info` (
                              `max_supply` bigint(20) NOT NULL DEFAULT '0.00000000' COMMENT '最大供应数量',
                              `total_supply` bigint(20) NOT NULL DEFAULT '0.00000000' COMMENT '当前流通数量',
                              `fully_diluted_market_cap` decimal(30,8) NOT NULL DEFAULT '0.00000000' COMMENT '总市值',
-                             `coin_ranking` int(11) NOT NULL COMMENT '市值排名',
+                             `coin_ranking` int(11) NOT NULL COMMENT '得分',
                              `db_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据库插入时间，请勿修改',
                              `db_modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据库更新时间，请勿修改',
                              PRIMARY KEY (`id`),
@@ -23,6 +23,8 @@ CREATE TABLE `coin_info` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 
+ALTER TABLE coin_info
+    ADD market_cap_rank   int(11) NOT NULL COMMENT '市值排名' AFTER  coin_ranking;
 
 DROP table market_info;
 

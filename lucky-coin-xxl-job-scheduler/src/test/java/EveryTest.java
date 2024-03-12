@@ -34,6 +34,12 @@ public class EveryTest {
         baseCoins.add("hnt");
         baseCoins.add("ace");
         baseCoins.add("near");
+        baseCoins.add("nfp");
+        baseCoins.add("deso");
+        baseCoins.add("rio");
+        baseCoins.add("shdw");
+        baseCoins.add("zrx");
+
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }

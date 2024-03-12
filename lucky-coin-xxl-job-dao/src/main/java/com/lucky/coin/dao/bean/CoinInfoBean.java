@@ -30,7 +30,8 @@ public class CoinInfoBean {
     private Long maxSupply;// '最大供应量',
     private Long totalSupply;// '当前供应量',
     private BigDecimal fullyDilutedMarketCap; // 总市值
-    private Long coinRanking;//  '市值排名',
+    private Long coinRanking;//  '得分',
+    private Long marketCapRank;//  '市值排名',
     private Date dbCreate_time;// '数据库插入时间，请勿修改',
     private Date dbModifyTime; // '数据库更新时间，请勿修改',
 }
