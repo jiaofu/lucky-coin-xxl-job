@@ -39,7 +39,9 @@ public class EveryTest {
         baseCoins.add("rio");
         baseCoins.add("shdw");
         baseCoins.add("zrx");
-
+        baseCoins.add("axl");
+        baseCoins.add("ngl");
+        baseCoins.add("vanry");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }

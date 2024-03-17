@@ -232,10 +232,12 @@ public class CollectionInfoImpl implements CollectionInfo {
                 continue;
             }
             vo.setWeekUpFee(fee);
-            Long coinAllInfoVo =  new Double( vo.getCoinScore()*0.6 +  (perScore*coinAllInfoVos.size() - (fee*perScore))*0.4 ).longValue();
+            Long coinAllInfoVo =  new Double( vo.getCoinScore()- (fee*perScore*0.4) ).longValue();
             vo.setFeeAddScore(coinAllInfoVo);
         }
-        Integer topCoinList =  coinAllInfoVos.size()/14 *13;
+        Integer size = 9;
+        Integer lowCoin  =  coinAllInfoVos.size()/size;
+        Integer topCoinList =  coinAllInfoVos.size()-lowCoin;
         StringBuilder sb = new StringBuilder();
 
 //        Integer countScore = 0;
@@ -270,7 +272,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
             sb .append( JSON.toJSONString(vo) + "\n\r ");
         }
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}     \n\r  ", sb.toString(),day,coinAllInfoVos.size());
+        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  垃圾币种 : {}    \n\r  ", sb.toString(),day,coinAllInfoVos.size(),feeAddScoreList.size() - topCoinList+1);
 
 
     }
