@@ -42,6 +42,15 @@ public class EveryTest {
         baseCoins.add("axl");
         baseCoins.add("ngl");
         baseCoins.add("vanry");
+        baseCoins.add("arkm");
+        baseCoins.add("cyber");
+        baseCoins.add("ssv");
+        baseCoins.add("gal");
+        baseCoins.add("ftm");
+        baseCoins.add("ckb");
+        baseCoins.add("gfi");
+        baseCoins.add("ondo");
+        baseCoins.add("apx");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }

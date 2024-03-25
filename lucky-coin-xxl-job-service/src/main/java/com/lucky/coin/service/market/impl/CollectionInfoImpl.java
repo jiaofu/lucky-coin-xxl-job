@@ -240,6 +240,8 @@ public class CollectionInfoImpl implements CollectionInfo {
         Integer topCoinList =  coinAllInfoVos.size()-lowCoin;
         StringBuilder sb = new StringBuilder();
 
+
+        sb.append("开始时间：20231219 日 \n\r");
 //        Integer countScore = 0;
 //        sb.append(" score+fee \n\r \n\r");
 //        for( CoinAllInfoVo vo :    coinAllInfoVos){
@@ -259,18 +261,22 @@ public class CollectionInfoImpl implements CollectionInfo {
         sorted((o1,o2)->(o1.getFeeAddScore().compareTo(o2.getFeeAddScore()))).collect(Collectors.toList());
 
 
-        sb.append(" \n\r \n\r ");
 
         Integer count = 0;
         for( CoinAllInfoVo vo :    feeAddScoreList){
             count++;
 
 
+
             if(count==topCoinList){
-                sb.append(" 垃圾币种 \n\r \n\r");
+                sb.append("-----------垃圾币种----------- \n\r");
             }
 
             sb .append( JSON.toJSONString(vo) + "\n\r ");
+
+            if(vo.getSymbol().equalsIgnoreCase("BTC")){
+                sb.append(" -----------btc---------- \n\r ");
+            }
         }
         log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  垃圾币种 : {}    \n\r  ", sb.toString(),day,coinAllInfoVos.size(),feeAddScoreList.size() - topCoinList+1);
 
