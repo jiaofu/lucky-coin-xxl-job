@@ -1,7 +1,7 @@
 package com.lucky.coin.dao.mapper;
 
 import com.lucky.coin.dao.bean.MarketInfoBean;
-import com.lucky.coin.dao.bean.PoolCoinBean;
+
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 

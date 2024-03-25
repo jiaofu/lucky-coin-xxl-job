@@ -240,7 +240,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         Integer topCoinList =  coinAllInfoVos.size()-lowCoin;
         StringBuilder sb = new StringBuilder();
 
-
+        sb.append("当前时间： "+ DateUtil.getMinerDayBefore(0) +" 日\n\r");
         sb.append("开始时间：20231219 日 \n\r");
 //        Integer countScore = 0;
 //        sb.append(" score+fee \n\r \n\r");
@@ -278,7 +278,7 @@ public class CollectionInfoImpl implements CollectionInfo {
                 sb.append(" -----------btc---------- \n\r ");
             }
         }
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  垃圾币种 : {}    \n\r  ", sb.toString(),day,coinAllInfoVos.size(),feeAddScoreList.size() - topCoinList+1);
+        log.info("  writeSymbol : \n\r{}  day :{}   排序总币种数量:{}  垃圾币种 : {}    \n\r  ", sb.toString(),day,coinAllInfoVos.size(),feeAddScoreList.size() - topCoinList+1);
 
 
     }

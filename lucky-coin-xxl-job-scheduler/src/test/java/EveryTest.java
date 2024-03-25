@@ -1,4 +1,4 @@
-import com.binance.pool.util.DateUtils;
+
 import com.lucky.coin.LuckyCoinXxlJobApplication;
 import com.lucky.coin.service.market.CollectionInfo;
 import com.lucky.coin.service.util.DateUtil;
@@ -58,6 +58,6 @@ public class EveryTest {
     @Test
     public void everyDay(){
         collectionInfo.getEveryCoinScore();
-        log.info("  everyDay 今日计算数据 day : {} ", DateUtils.getMinerDayBefore(0));
+        log.info("  everyDay 今日计算数据 day : {} ", DateUtil.getMinerDayBefore(0));
     }
 }

@@ -13,7 +13,7 @@ spring:
   application:
     name: binance-mining-pool-report-cron
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     idle-timeout: 600000
     maximum-pool-size: 10
     max-lifetime: 1800000

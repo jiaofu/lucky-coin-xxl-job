@@ -82,7 +82,7 @@ public class Constants {
     public static final String USER_HASHRATE_CHANNEL = "USER_HASHRATE_CHANNEL";
     public static final String WSS_TOKEN_PREFIX = "PLNT";
     public static final String ENCODED_UTF8 = "UTF-8";
-    public static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+    public static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
     /**
      * 发送时间间隔
      */

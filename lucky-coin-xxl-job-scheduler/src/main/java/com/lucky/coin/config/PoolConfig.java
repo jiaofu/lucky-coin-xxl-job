@@ -1,7 +1,6 @@
 package com.lucky.coin.config;
 
-import com.binance.pool.config.config.BlockChairKeyConfig;
-import com.binance.pool.config.config.TokenViewKeyConfig;
+
 import com.lucky.coin.service.config.SysConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,25 +25,7 @@ public class PoolConfig {
     }
 
 
-    @Bean
-    @ConfigurationProperties(prefix = "pool.blockchair")
-    public BlockChairKeyConfig getBlockChairKeyConfig(@Autowired SysConfig sysConfig) {
-        BlockChairKeyConfig blockChairKeyConfig = BlockChairKeyConfig.builder()
 
-                .build();
-        log.info("getBlockChairKeyConfig apiKey is isBlank:{}", StringUtils.isBlank(blockChairKeyConfig.getApi_key()));
-        return blockChairKeyConfig;
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "pool.tokenview")
-    public TokenViewKeyConfig getTokenViewKeyConfig(@Autowired SysConfig sysConfig) {
-        TokenViewKeyConfig tokenViewKeyConfig = TokenViewKeyConfig.builder()
-
-                .build();
-        log.info("TokenViewKeyConfig apiKey is isBlank:{}", StringUtils.isBlank(tokenViewKeyConfig.getApikey()));
-        return tokenViewKeyConfig;
-    }
 
 
 }
