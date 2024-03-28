@@ -79,7 +79,11 @@ public class CollectionInfoImpl implements CollectionInfo {
         List<String> getSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
         List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(getSymbols);
         initMarketRank(marketCapVos,day);
-        handleCoinScoreByDay(marketCapVos,day);
+        Boolean saveMarket = handleCoinScoreByDay(marketCapVos,day);
+        if(!saveMarket){
+            log.error(" getEveryCoinScore  没有报错，请检查  ");
+            return;
+        }
         marketInfoBeans = marketInfoDao.getAll(day);
 
 
@@ -298,7 +302,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param marketCapVos
      * @param day
      */
-    public void  handleCoinScoreByDay( List<CoinFullyDilutedMarketCapVo> marketCapVos,Long day){
+    public Boolean  handleCoinScoreByDay( List<CoinFullyDilutedMarketCapVo> marketCapVos,Long day){
 
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
         List<MarketInfoBean> marketInfoBeans = marketInfoDao.getAll(day);
@@ -323,7 +327,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
         if(duplicatesList != null && duplicatesList.size()>0){
             log.error(" handleCoinScoreByDay 币种有错误   symbol  大于基础   lastSize  :{}  基础币种:{} 重复:{} ",lastSymbols.size(),baseSymbols.size(), JSON.toJSONString(duplicatesList));
-            return;
+            return false;
         }
 
         /**
@@ -336,7 +340,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         Map<String,Long> scoreMap = getHistoryScore(marketInfoBeans,baseSymbols);
         if(rankMap == null || scoreMap == null){
             log.error(" handleCoinScoreByDay 排名有错误 symbol:{} ",lastSymbols);
-            return ;
+            return false;
         }
 
         List<MarketInfoBean> list = new ArrayList<>();
@@ -369,6 +373,10 @@ public class CollectionInfoImpl implements CollectionInfo {
 
         Integer batchNum = marketInfoDao.batchInsert(list);
         log.info("  handleCoinScoreByDay   day :{}  batchNum : {} ",day,batchNum);
+        if(batchNum>0){
+            return true;
+        }
+        return false;
     }
 
     /**
