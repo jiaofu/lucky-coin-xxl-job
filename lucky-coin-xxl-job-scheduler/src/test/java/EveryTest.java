@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
@@ -65,12 +66,19 @@ public class EveryTest {
         baseCoins.add("ondo");
         baseCoins.add("apx");
         baseCoins.add("rss3");
+        baseCoins.add("alph");
+        baseCoins.add("aevo");
+        baseCoins.add("zk");
+        baseCoins.add("core");
+        baseCoins.add("theta");
+
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
     }
 
     @Test
     public void everyDay(){
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         collectionInfo.getEveryCoinScore();
         log.info("  everyDay 今日计算数据 day : {} ", DateUtil.getMinerDayBefore(0));
     }

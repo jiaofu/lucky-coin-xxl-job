@@ -432,9 +432,13 @@ public class CollectionInfoImpl implements CollectionInfo {
             for( String str :  baseCoin){
 
                 if(coinInfoVo == null){
-                    log.info(" getFullyMarketCap symbol :{}  null",str);
+                    log.info(" getFullyMarketCap  获取错误",str);
+                    return list;
                 }
                 Coin coin = coinInfoVo.getData().get(str.toUpperCase());
+                if(coin == null ){
+                    log.error(" getFullyMarketCap symbol :{}  null",str);
+                }
                 Currency currency = coin.getQuote().getUSD();
                 CoinFullyDilutedMarketCapVo vo = new CoinFullyDilutedMarketCapVo();
                 vo.setFullyDilutedMarketCap(currency.getFully_diluted_market_cap());
