@@ -226,6 +226,23 @@ public class CollectionInfoImpl implements CollectionInfo {
                 }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
 
 
+        List<CoinAllInfoVo> coinInfoSoreVos = coinAllInfoVos.stream().sorted((o1,o2)->o1.getCoinScore().compareTo(o2.getCoinScore())).collect(Collectors.toList());
+
+        int i =1;
+        for(CoinAllInfoVo  vo : coinInfoSoreVos){
+
+            if(!vo.getSymbol().equalsIgnoreCase("BTC")){
+                i++;
+            }else {
+                break;
+            }
+
+
+        }
+
+
+        double factor = new Double(i)/coinInfoSoreVos.size();
+
         Map<String,Long> rankMap =  rankFeeVos.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getFee()));
 
         Long perScore = (  coinAllInfoVos.get(coinAllInfoVos.size()-1).getCoinScore() -coinAllInfoVos.get(0).getCoinScore()) /
@@ -236,7 +253,7 @@ public class CollectionInfoImpl implements CollectionInfo {
                 continue;
             }
             vo.setWeekUpFee(fee);
-            Long coinAllInfoVo =  new Double( vo.getCoinScore()- (fee*perScore*0.4) ).longValue();
+            Long coinAllInfoVo =  new Double( vo.getCoinScore()- (fee*perScore*factor) ).longValue();
             vo.setFeeAddScore(coinAllInfoVo);
         }
         Integer size = 9;
@@ -245,6 +262,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         StringBuilder sb = new StringBuilder();
 
         sb.append("当前时间： "+ DateUtil.getMinerDayBefore(0) +" 日\n\r");
+        sb.append("算力因子： "+ factor +" 日\n\r");
         sb.append("开始时间：20231219 日 \n\r");
 //        Integer countScore = 0;
 //        sb.append(" score+fee \n\r \n\r");

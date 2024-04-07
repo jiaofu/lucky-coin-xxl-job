@@ -71,6 +71,7 @@ public class EveryTest {
         baseCoins.add("zk");
         baseCoins.add("core");
         baseCoins.add("theta");
+       // baseCoins.add("ena");
 
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         collectionInfo.initSymbol(yBase);
