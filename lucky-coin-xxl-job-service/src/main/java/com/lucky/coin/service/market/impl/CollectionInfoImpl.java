@@ -102,39 +102,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         writeSymbolAll(rankFeeVos,marketInfoBeans,day);
     }
 
-    /**
-     * 显示排序的币种
-     * @param marketInfoBeans
-     * @param day
-     */
-    private void writeSymbolScore( List<MarketInfoBean> marketInfoBeans,Long day){
-        List<CoinRankVo> coinRankVos =  marketInfoBeans.stream().filter(q->q.getDay()-day ==0)
-                .map(q->{
-                    CoinRankVo coinRankVo = CoinRankVo.builder()
-                            .coinScore(q.getCoinScore())
-                            .symbol(q.getSymbol())
-                            .build();
-                    return coinRankVo;
-                }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
 
-
-
-        StringBuilder sb = new StringBuilder();
-
-        for( CoinRankVo vo :    coinRankVos){
-            sb .append( JSON.toJSONString(vo) + "\n\r ");
-        }
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", sb.toString(),day,coinRankVos.size());
-        Integer topCoinList =  coinRankVos.size()/14 *13;
-        List<CoinRankVo> wasteCoin =  coinRankVos.stream().skip(topCoinList).collect(Collectors.toList());
-
-        StringBuilder wasterSb = new StringBuilder();
-        wasterSb.append(" 垃圾币种 ");
-        for( CoinRankVo vo :    wasteCoin){
-            wasterSb .append( JSON.toJSONString(vo) + "\n\r ");
-        }
-        log.info("  writeSymbol : \n\r {}  day :{}   排序总币种数量:{}  \n\r  ", wasterSb.toString(),day,wasteCoin.size());
-    }
 
     /**
      * 获取币种的进步速度
@@ -154,11 +122,23 @@ public class CollectionInfoImpl implements CollectionInfo {
            List<MarketInfoBean> marketInfoBeanList = map.get(day);
 
            Map<String,MarketInfoBean> marketRankByDay = marketInfoBeanList.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t));
+
+           // 初始化 第一版确实的数据。是获取 btc 的数据，但是99% 的币种都比不上btc。 造成新币种的优势太大了，后期尽管大跌，也可以不被列为垃圾币
+           // 再次是获取 中间的币种，虽然不知道好坏。但是用中间的就是不确定性
+           // MarketInfoBean initBean =  marketRankByDay.get("BTC");
+           List<MarketInfoBean> marketInfoSorts  =   marketInfoBeanList.stream().sorted((o1,o2)->o2.getCoinRanking().compareTo(o1.getCoinRanking())).collect(Collectors.toList());
+
+           Integer middle = marketRankByDay.size()/2+1;
+           if( middle > (marketRankByDay.size()-1)){
+               middle = marketRankByDay.size()-1;
+           }
+           MarketInfoBean middleBean =  marketInfoSorts.get(middle);
             for(CoinInfoBean coinInfoBean :  coinInfoBeans){
                 MarketInfoBean bean =   marketRankByDay.get(coinInfoBean.getSymbol());
 
                 if(bean == null){
-                    bean = marketRankByDay.get("BTC");
+     
+                    bean = middleBean;
                 }
                 List<Long> listRank =  mapRank.get(coinInfoBean.getSymbol());
                 if(listRank == null){
@@ -253,16 +233,32 @@ public class CollectionInfoImpl implements CollectionInfo {
                 continue;
             }
             vo.setWeekUpFee(fee);
+
             Long coinAllInfoVo =  new Double( vo.getCoinScore()- (fee*perScore*factor) ).longValue();
             vo.setFeeAddScore(coinAllInfoVo);
         }
-        Integer size = 9;
-        Integer lowCoin  =  coinAllInfoVos.size()/size;
-        Integer topCoinList =  coinAllInfoVos.size()-lowCoin;
+        List<CoinAllInfoVo> feeAddScoreList =  coinAllInfoVos.stream().
+                sorted((o1,o2)->(o1.getFeeAddScore().compareTo(o2.getFeeAddScore()))).collect(Collectors.toList());
+
+        Integer excellent = 1;
+        for(CoinAllInfoVo infoVo : feeAddScoreList){
+            if(infoVo.getSymbol().equalsIgnoreCase("BTC")){
+                break;
+            }
+            excellent ++;
+        }
+        // 之前是取10分之9了，但是大部分币种都不跑赢btc。 98% 都是垃圾币
+        // 所有应该是动态的过程,btc 跑赢大部分币种的时候，那么垃圾币种应该少
+        // btc 跑输大部分币种的时候，那么垃圾币种应该多
+        // 那么垃圾币一半中大部分，取factor 都是要垃圾
+
+        Double topCoinList = (new Double( coinAllInfoVos.size()/2 +1 ) * ( new Double(1-factor)/2));
         StringBuilder sb = new StringBuilder();
 
         sb.append("当前时间： "+ DateUtil.getMinerDayBefore(0) +" 日\n\r");
         sb.append("算力因子： "+ factor +" 日\n\r");
+        sb.append("优秀数量： "+ excellent +" 日\n\r");
+        sb.append("垃圾数量： "+ topCoinList +" 日\n\r");
         sb.append("开始时间：20231219 日 \n\r");
 //        Integer countScore = 0;
 //        sb.append(" score+fee \n\r \n\r");
@@ -279,8 +275,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 //        sb.append("   \n\r");
 
 
-        List<CoinAllInfoVo> feeAddScoreList =  coinAllInfoVos.stream().
-        sorted((o1,o2)->(o1.getFeeAddScore().compareTo(o2.getFeeAddScore()))).collect(Collectors.toList());
+
 
 
 
@@ -290,7 +285,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
 
 
-            if(count==topCoinList){
+            if(count==topCoinList.intValue()){
                 sb.append("-----------垃圾币种----------- \n\r");
             }
 
@@ -601,14 +596,15 @@ public class CollectionInfoImpl implements CollectionInfo {
 
             map.put(name, i+1);
         }
-        // 如果币种没有的话，那就按照btc的分数
+        //每个币种必须需要排序
         for(int i=0;i<baseCoin.size(); i++    ){
 
             String baseName = baseCoin.get(i).toUpperCase();
 
             Long rank =   map.get(baseName.toUpperCase());
             if(rank == null){
-                 rank   = map.get("BTC");
+                log.error(" getCoinValue 币种没有包含 : {} rank ",baseName.toUpperCase());
+                return null;
             }
             map.put(baseName, rank);
         }
@@ -630,16 +626,27 @@ public class CollectionInfoImpl implements CollectionInfo {
 
           Map<String,Long> entryMap =  entry.getValue().stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking(),(o1,o2)->o1));
 
+            // 初始化 第一版确实的数据。是获取 btc 的数据，但是99% 的币种都比不上btc。 造成新币种的优势太大了，后期尽管大跌，也可以不被列为垃圾币
+            // 再次是获取 中间的币种，虽然不知道好坏。但是用中间的就是不确定性
+            // MarketInfoBean initBean =  marketRankByDay.get("BTC");
+            List<MarketInfoBean> marketInfoSorts  =   entry.getValue().stream().sorted((o1,o2)->o2.getCoinRanking().compareTo(o1.getCoinRanking())).collect(Collectors.toList());
+
+            Integer middle = marketInfoSorts.size()/2+1;
+            if( middle > (marketInfoSorts.size()-1)){
+                middle = marketInfoSorts.size()-1;
+            }
             for(int i=0;i<baseCoin.size(); i++    ){
 
                 String baseName = baseCoin.get(i).toUpperCase();
 
                 Long rank =   entryMap.get(baseName);
                 if(rank == null){
-                    // 获取当天btc的数据
-                    rank   = entryMap.get("BTC");
+                    // 获取当天的数据
+                    rank   = marketInfoSorts.get(middle).getCoinRanking();
                 }
 
+                
+                
                 Long value = map.get(baseName);
                 if(value == null){
                     value = 0L;
@@ -653,44 +660,4 @@ public class CollectionInfoImpl implements CollectionInfo {
         return map;
     }
 
-    /**
-     * 币种计算分数
-     * @param yList
-     * @param map
-     * @param baseCoin
-     * @return
-     */
-    private Boolean  getCoinValue(List<String> yList , Map<String,Integer> map, List<String> baseCoin){
-
-        Map<String,Integer> yMap = new LinkedHashMap<>();
-
-       for(int i=0;i<yList.size(); i++    ){
-
-
-           String name = yList.get(i);
-            if(!baseCoin.contains(name)){
-                log.error(" getCoinValue 币种没有包含 : {} ",name);
-                return false;
-            }
-            yMap.put(name, (i+1));
-        }
-
-        // 如果币种没有的话，那就按照btc的分数
-        for(int i=0;i<baseCoin.size(); i++    ){
-
-            String baseName = baseCoin.get(i);
-
-            Integer value =   yMap.get(baseName);
-            if(value == null){
-                value = yMap.get("BTC");
-            }
-
-            Integer baseValue = map.get(baseName);
-
-            Integer nowValue =  baseValue + value;
-
-            map.put(baseName,nowValue);
-        }
-        return true;
-    }
 }
