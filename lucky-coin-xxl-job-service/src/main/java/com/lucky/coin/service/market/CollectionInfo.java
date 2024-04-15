@@ -31,4 +31,6 @@ public interface CollectionInfo {
       * @param day
       */
      void initMarketHistory(Long day);
+
+     void initMarketHistoryAll();
 }

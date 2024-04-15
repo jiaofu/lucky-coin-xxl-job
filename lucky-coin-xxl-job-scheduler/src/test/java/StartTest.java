@@ -1,9 +1,4 @@
-/*
-import com.alibaba.fastjson.JSON;
 import com.lucky.coin.LuckyCoinXxlJobApplication;
-import com.lucky.coin.dao.bean.PoolCoinBean;
-
-import com.lucky.coin.dao.pool.CoinDao;
 import com.lucky.coin.service.market.CollectionInfo;
 import com.lucky.coin.service.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +9,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = LuckyCoinXxlJobApplication.class)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = LuckyCoinXxlJobApplication.class)
 @Slf4j
 public class StartTest {
 
 
-    @Resource
-    CoinDao coinDao;
 
     @Resource
     CollectionInfo collectionInfo;
@@ -36,7 +29,7 @@ public class StartTest {
 
     @Test
     public void initDb(){
-        String yBase ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,rndr,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,map,cqt,gns,trias,ator,wifi,equ,dnx,zkf";
+        String yBase ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,rndr,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,mapo,cqt,gns,trias,ator,wifi,equ,dnx,zkf";
 
         collectionInfo.initSymbol(yBase);
 
@@ -58,17 +51,17 @@ public class StartTest {
         String Y20240123 = "nos,ron,pyth,tao,dnx,rndr,bnb,okb,iotx,btc,eth,wemix,naka,cqt,grt,ilv,kas,sol,rune,ar,imx,op,magic,wifi,avax,shrap,ldo,fet,inj,trias,gns,tia,arb,sui,sats,bigtime,olas,sei,equ,zkf";
         String Y20240124 ="nos,ron,pyth,tao,dnx,bnb,btc,rndr,naka,wemix,sui,kas,ilv,iotx,tia,imx,eth,grt,okb,ar,sol,avax,fet,rune,trias,sei,gns,shrap,inj,cqt,op,bigtime,arb,ldo,olas,wifi,magic,sats,zkf,equ";
         String Y20240126 = "nos,tao,pyth,olas,ron,cqt,sui,shrap,naka,iotx,rune,dnx,ldo,trias,grt,kas,btc,imx,okb,fet,bnb,op,arb,sol,tia,avax,wemix,ar,magic,eth,gns,rndr,bigtime,ilv,inj,zkf,sei,wifi,equ,sats";
-        String Y20240128 ="nos,tao,sui,trias,ron,naka,avax,ldo,kas,rndr,olas,shrap,rune,magic,sol,stx,cqt,map,fet,btc,iotx,imx,tia,inj,arb,sei,bigtime,grt,okb,op,gns,bnb,pyth,dnx,sats,ar,wemix,eth,zkf,wifi,ilv,equ";
-        String Y20240130 = "tao,sui,trias,nos,avax,sol,olas,map,sei,stx,tia,rndr,magic,ron,rune,sats,naka,inj,arb,dnx,imx,ldo,op,fet,pyth,grt,bigtime,cqt,iotx,kas,okb,gns,btc,ar,wemix,bnb,ilv,eth,zkf,shrap,wifi,equ";
-        String Y20240201 = "tao,sats,magic,ron,trias,rndr,sui,rune,dnx,map,avax,imx,sol,inj,btc,tia,pyth,olas,op,bnb,grt,eth,gns,wifi,arb,stx,sei,kas,naka,okb,bigtime,wemix,ilv,iotx,ldo,ar,fet,cqt,nos,shrap,zkf,equ";
-        String Y20240217 = "lpt,nos,zeta,equ,stx,ar,wifi,api3,sei,olas,shrap,tao,kas,bigtime,naka,trias,gns,fet,iotx,sats,imx,alt,grt,eth,rndr,bnb,ron,map,btc,ilv,ldo,rune,magic,pyth,op,okb,avax,wemix,inj,sui,arb,sol,dnx,cqt,zkf,tia";
+        String Y20240128 ="nos,tao,sui,trias,ron,naka,avax,ldo,kas,rndr,olas,shrap,rune,magic,sol,stx,cqt,mapo,fet,btc,iotx,imx,tia,inj,arb,sei,bigtime,grt,okb,op,gns,bnb,pyth,dnx,sats,ar,wemix,eth,zkf,wifi,ilv,equ";
+        String Y20240130 = "tao,sui,trias,nos,avax,sol,olas,mapo,sei,stx,tia,rndr,magic,ron,rune,sats,naka,inj,arb,dnx,imx,ldo,op,fet,pyth,grt,bigtime,cqt,iotx,kas,okb,gns,btc,ar,wemix,bnb,ilv,eth,zkf,shrap,wifi,equ";
+        String Y20240201 = "tao,sats,magic,ron,trias,rndr,sui,rune,dnx,mapo,avax,imx,sol,inj,btc,tia,pyth,olas,op,bnb,grt,eth,gns,wifi,arb,stx,sei,kas,naka,okb,bigtime,wemix,ilv,iotx,ldo,ar,fet,cqt,nos,shrap,zkf,equ";
+        String Y20240217 = "lpt,nos,zeta,equ,stx,ar,wifi,api3,sei,olas,shrap,tao,kas,bigtime,naka,trias,gns,fet,iotx,sats,imx,alt,grt,eth,rndr,bnb,ron,mapo,btc,ilv,ldo,rune,magic,pyth,op,okb,avax,wemix,inj,sui,arb,sol,dnx,cqt,zkf,tia";
 
-        String Y20240225 = "xai,nos,fet,cqt,rndr,grt,dnx,metis,alt,ator,akt,mask,ar,olas,eth,bnb,ldo,kas,ilv,stx,map,gns,op,rune,btc,magic,wemix,okb,ron,wifi,api3,imx,sol,arb,shrap,bigtime,trias,naka,pyth,sui,avax,inj,sei,equ,tia,tao,iotx,zeta,sats,zkf,lpt";
+        String Y20240225 = "xai,nos,fet,cqt,rndr,grt,dnx,metis,alt,ator,akt,mask,ar,olas,eth,bnb,ldo,kas,ilv,stx,mapo,gns,op,rune,btc,magic,wemix,okb,ron,wifi,api3,imx,sol,arb,shrap,bigtime,trias,naka,pyth,sui,avax,inj,sei,equ,tia,tao,iotx,zeta,sats,zkf,lpt";
 
-        String Y20240227 = "nos,olas,pyth,alt,flux,akt,rndr,metis,xai,grt,fet,wifi,bnb,stx,zeta,map,ldo,ilv,ator,mask,eth,rune,ar,btc,iotx,dnx,imx,naka,op,avax,sol,sei,cqt,okb,sats,wemix,shrap,equ,sui,tao,trias,arb,api3,bigtime,gns,inj,kas,magic,ron,tia,lpt,zkf";
+        String Y20240227 = "nos,olas,pyth,alt,flux,akt,rndr,metis,xai,grt,fet,wifi,bnb,stx,zeta,mapo,ldo,ilv,ator,mask,eth,rune,ar,btc,iotx,dnx,imx,naka,op,avax,sol,sei,cqt,okb,sats,wemix,shrap,equ,sui,tao,trias,arb,api3,bigtime,gns,inj,kas,magic,ron,tia,lpt,zkf";
 
-        String Y20240228 ="nos,ar,flux,metis,ilv,akt,pyth,grt,rndr,olas,rune,inj,bnb,map,fet,btc,bigtime,eth,dnx,zeta,shrap,wifi,ldo,iotx,stx,sats,avax,naka,cqt,wemix,sol,api3,equ,okb,tao,ator,xai,op,imx,sei,alt,arb,zkf,mask,gns,sui,tia,kas,lpt,trias,magic,ron";
-
+        String Y20240228 ="nos,ar,flux,metis,ilv,akt,pyth,grt,rndr,olas,rune,inj,bnb,mapo,fet,btc,bigtime,eth,dnx,zeta,shrap,wifi,ldo,iotx,stx,sats,avax,naka,cqt,wemix,sol,api3,equ,okb,tao,ator,xai,op,imx,sei,alt,arb,zkf,mask,gns,sui,tia,kas,lpt,trias,magic,ron";
+      //  collectionInfo.initMarketHistory(Y20240201,20240201L);
 
         collectionInfo.initMarketHistory(y20231219,20231219L);
         collectionInfo.initMarketHistory(y20240104,20240104L);
@@ -108,4 +101,3 @@ public class StartTest {
     }
 
 }
-*/

@@ -37,7 +37,7 @@ public class MarketInfoDaoImpl implements MarketInfoDao {
     }
 
     @Override
-    public List<MarketInfoBean> getAll(Long day) {
+    public List<MarketInfoBean> getLessThanOrEqualTo(Long day) {
         Example example = new Example(MarketInfoBean.class);
         Example.Criteria criteria = example.createCriteria();
 
