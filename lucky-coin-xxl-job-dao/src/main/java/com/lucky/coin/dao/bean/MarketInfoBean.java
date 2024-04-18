@@ -34,6 +34,7 @@ public class MarketInfoBean {
     @Column(name = "percent_change_30d")
     private BigDecimal percentChange30d;//  '30日安价格价格',
     private Long coinRanking;//  '本次排名',
+    //private Long c
     private Long coinScore;// '本次得分',
     private Date lastUpdated;// '行情更新时间',
     private BigDecimal fullyDilutedMarketCap; // 总市值

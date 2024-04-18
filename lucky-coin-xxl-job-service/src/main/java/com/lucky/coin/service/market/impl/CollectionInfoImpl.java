@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.lucky.coin.service.util.Constants.defaultFactor;
+
 
 @Service
 @Slf4j
@@ -42,21 +44,8 @@ public class CollectionInfoImpl implements CollectionInfo {
 
     }
 
-    Double defaultFactor = new Double(0.25);
 
-    Long startDay = 20231219L;
-    @Override
-    public void initSymbol(String yBase) {
-        Long day = DateUtil.getMinerDayBefore(0);
-        List<String> baseCoin = Arrays.stream(yBase.split(",")).collect(Collectors.toList());
-        Set<String> setCoin = baseCoin.stream().collect(Collectors.toSet());
-        if(setCoin.size() - baseCoin.size() !=0){
-            log.error(" getCoinValue 币种有错误 yBase  symbol 有重复 ");
-            return ;
-        }
-        List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(baseCoin);
-        initMarketRank(marketCapVos,day);
-    }
+
 
     @Override
     public void getEveryCoinScore() {
@@ -92,22 +81,22 @@ public class CollectionInfoImpl implements CollectionInfo {
      */
     private void writeSymbol(  Long day, List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans){
       //  writeSymbolScore(marketInfoBeans,day);
-        List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(marketInfoBeans,coinInfoBeans,day);
+        List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(marketInfoBeans,coinInfoBeans,8);
         writeSymbolAll(rankFeeVos,marketInfoBeans,day);
     }
 
 
 
     /**
-     * 获取币种的进步速度
+     * 获取币种的进步速度(这7天每天的进步)
      * @param marketInfoBeans
      * @param coinInfoBeans
-     * @param dayNow
+     * @param
      */
-    private  List<CoinRankFeeVo>  writeSymbolRankFee( List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans,Long dayNow ){
+    private  List<CoinRankFeeVo>  writeSymbolRankFee( List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans,Integer takeNum ){
        Map<Long,List<MarketInfoBean>>  map = marketInfoBeans.stream().collect(Collectors.groupingBy(q->q.getDay()));
        // 8条数据， 第一条数据用户初始化，其他的7条数据用户计算速率
-       List<Long> days =  map.entrySet().stream().map(q->q.getKey()).sorted(((o1, o2) -> o1.compareTo(o2))).skip(map.size()-8).collect(Collectors.toList());
+       List<Long> days =  map.entrySet().stream().map(q->q.getKey()).sorted(((o1, o2) -> o1.compareTo(o2))).skip(map.size()-takeNum).collect(Collectors.toList());
 
        Map<String,List<Long>> mapRank = new HashMap<>();
 
@@ -178,6 +167,8 @@ public class CollectionInfoImpl implements CollectionInfo {
         return soreResult;
     }
 
+
+
     /**
      * 数据最后写出
      * @param rankFeeVos
@@ -222,7 +213,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         // 那么垃圾币一半中大部分，取factor 都是要垃圾
 
         /**
-         *    //第一次买入池，第二区是奋进区，第三区是观察区。 第四区是抛售区，第五区是垃圾区, 没有获取到的币种，默认是第三区。
+         *    //第一次买入池，第二区是奋进区，第三区是观察区。 第四区是准备抛售区，第五区是垃圾区, 没有获取到的币种，默认是第三区。
          * @param marketInfoBeans
          * @return
          */
@@ -231,7 +222,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         if (factor > defaultFactor) {
             classFactor = defaultFactor;
         }
-        Integer baseSize = new Double(Math.ceil(coinAllInfoVos.size() * classFactor)).intValue();
+        Integer baseSize = new Double(Math.ceil(coinAllInfoVos.size() * classFactor)+1).intValue();
         //Integer buy = new Double( Math.ceil( coinAllInfoVos.size()*classFactor)).intValue();
         Integer chasing = baseSize;
         Integer observe = baseSize * 2;
@@ -268,18 +259,18 @@ public class CollectionInfoImpl implements CollectionInfo {
             count++;
 
 
-            if (count == chasing.intValue()) {
+            if (count == (chasing.intValue()+1)) {
                 sb.append("-----------奋进区币种----------- \n\r");
             }
-            if (count == observe.intValue()) {
+            if (count == (observe.intValue()+1)) {
                 sb.append("-----------观察区币种----------- \n\r");
             }
 
-            if (count == selling.intValue()) {
-                sb.append("-----------抛售区币种----------- \n\r");
+            if (count == (selling.intValue()+1)) {
+                sb.append("-----------预抛售区币种----------- \n\r");
             }
-            if (count == garbage.intValue()) {
-                sb.append("-----------垃圾币种----------- \n\r");
+            if (count == (garbage.intValue()+1)) {
+                sb.append("-----------垃圾币种(立马抛售，不能犹豫)----------- \n\r");
             }
 
             sb .append( JSON.toJSONString(vo) + "\n\r ");
@@ -318,12 +309,12 @@ public class CollectionInfoImpl implements CollectionInfo {
          */
         List<CoinFullyDilutedMarketCapVo> sore =  marketCapVos.stream().sorted((o1,o2) ->o2.getPercentChange7d() .compareTo(o1.getPercentChange7d())).collect(Collectors.toList());
 
-        List<String> lastSymbols = sore.stream().map(q->q.getSymbol()).collect(Collectors.toList());
+        List<String> lastSymbolStr = sore.stream().map(q->q.getSymbol()).collect(Collectors.toList());
 
-        log.info(" handleCoinScoreByDay @@@@@@@@@@@@@@  7d 行情大到小的排序  : {}",JSON.toJSONString(lastSymbols));
+        log.info(" handleCoinScoreByDay @@@@@@@@@@@@@@  7d 行情大到小的排序  : {}",JSON.toJSONString(lastSymbolStr));
         List<String> baseSymbols = coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
 
-        List<String> duplicatesList = lastSymbols.stream()
+        List<String> duplicatesList = lastSymbolStr.stream()
                 .collect(Collectors.groupingBy(s -> s))
                 .entrySet()
                 .stream()
@@ -332,24 +323,21 @@ public class CollectionInfoImpl implements CollectionInfo {
                 .collect(Collectors.toList());
 
         if(duplicatesList != null && duplicatesList.size()>0){
-            log.error(" handleCoinScoreByDay 币种有错误   symbol  大于基础   lastSize  :{}  基础币种:{} 重复:{} ",lastSymbols.size(),baseSymbols.size(), JSON.toJSONString(duplicatesList));
+            log.error(" handleCoinScoreByDay 币种有错误   symbol  大于基础   lastSize  :{}  基础币种:{} 重复:{} ",lastSymbolStr.size(),baseSymbols.size(), JSON.toJSONString(duplicatesList));
             return false;
         }
 
-        /**
-         * 获取排名，用于，如果在没有获得排名。根据这些获取初始化排名
-         */
-       Map<String,Long>   rankMarketMap =  coinInfoBeans.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking()));
 
-        Map<String, Long> rankMap = getCoinRank(lastSymbols, baseSymbols, true);
 
-        Map<String,Long> scoreMap = getHistoryScore(marketInfoBeans,baseSymbols);
-        if(rankMap == null || scoreMap == null){
-            log.error(" handleCoinScoreByDay 排名有错误 symbol:{} ",lastSymbols);
+
+        Map<String,Long> scoreMap = getHistoryScore(marketInfoBeans,baseSymbols,day);
+        if( scoreMap == null){
+            log.error(" handleCoinScoreByDay 排名有错误 symbol:{} ",lastSymbolStr);
             return false;
         }
 
         List<MarketInfoBean> list = new ArrayList<>();
+        Integer rank =1;
         for( CoinFullyDilutedMarketCapVo capVo :    sore){
 
             CoinInfoBean coinInfoBean = coinInfoBeans.stream().filter(q->q.getSymbol().equalsIgnoreCase(capVo.getSymbol())).findFirst().orElse(null);
@@ -363,17 +351,14 @@ public class CollectionInfoImpl implements CollectionInfo {
             marketInfoBean.setFullyDilutedMarketCap(capVo.getFullyDilutedMarketCap());
             marketInfoBean.setLastUpdated(capVo.getLastUpdated());
 
-            Long rank = rankMap.get(capVo.getSymbol());
-            Long score = scoreMap.get(capVo.getSymbol());
-            Long marketRank = rankMarketMap.get(capVo.getSymbol());
-            if(marketInfoBeans.size()==0){
-                score = 0L;
-            }
 
-            Long sum = rank +score+marketRank;
+            Long score = scoreMap.get(capVo.getSymbol());
+
+            Long sum = rank +score;
             marketInfoBean.setCoinRanking( new Long(rank));
             marketInfoBean.setCoinScore(sum);
             list.add(marketInfoBean);
+            rank++;
         }
 
 
@@ -390,6 +375,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param marketCapVos
      * @param day
      */
+    @Override
     public void initMarketRank(  List<CoinFullyDilutedMarketCapVo> marketCapVos, Long day){
         List<CoinFullyDilutedMarketCapVo> sore =  marketCapVos.stream().sorted((o1,o2) ->o2.getFullyDilutedMarketCap().compareTo(o1.getFullyDilutedMarketCap())).collect(Collectors.toList());
         List<String>  initCoins = sore.stream().map(q->q.getSymbol()).collect(Collectors.toList());
@@ -430,7 +416,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param baseCoin
      * @return
      */
-    private List<CoinFullyDilutedMarketCapVo> getFullyMarketCap( List<String> baseCoin){
+    public List<CoinFullyDilutedMarketCapVo> getFullyMarketCap( List<String> baseCoin){
         try {
 
             List<CoinFullyDilutedMarketCapVo> list = new ArrayList<>();
@@ -477,109 +463,10 @@ public class CollectionInfoImpl implements CollectionInfo {
 
 
 
-    @Override
-    public void initMarketHistory(String symbols, Long day) {
-
-        symbols = symbols.toUpperCase();
-
-        List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(day);
-        List<String> baseSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
-        List<String> lastSymbols = Arrays.stream(symbols.split(",")).collect(Collectors.toList());
-        for( String str :     lastSymbols){
-            if(!baseSymbols.contains(str.toUpperCase())){
-                log.error(" initMarketHistory 币种有错误   symbol 在 baseCoin 不存在 : {} ",str);
-                return;
-            };
-        }
 
 
-
-
-        List<String> duplicatesList = lastSymbols.stream()
-                .collect(Collectors.groupingBy(s -> s))
-                .entrySet()
-                .stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(e -> e.getKey())
-                .collect(Collectors.toList());
-
-        if(duplicatesList != null && duplicatesList.size()>0){
-            log.error(" initMarketHistory 币种有错误   symbol  大于基础   lastSize  :{}  基础币种:{} 重复:{} ",lastSymbols.size(),baseSymbols.size(), JSON.toJSONString(duplicatesList));
-            return;
-        }
-
-        /**
-         * 市值得分
-         */
-        Map<String, Long> rankFullyDilutedMarketCapMap = coinInfoBeans.stream().collect(Collectors.toMap(q -> q.getSymbol(), t -> t.getCoinRanking()));
-
-
-        /**
-         * 本次得分
-         */
-        Map<String, Long> rankMap = getCoinRank(lastSymbols, baseSymbols, false);
-
-        /**
-         * 历史得分
-         */
-        Map<String,Long> scoreMap = getHistoryScore(marketInfoBeans,baseSymbols);
-        if ((rankMap == null || scoreMap == null) && (day - startDay > 0)) {
-            log.error(" initMarketHistory 排名有错误 symbol:{} ",symbols);
-            return ;
-        }
-
-        List<MarketInfoBean> list = new ArrayList<>();
-        for( String symbol :    baseSymbols){
-            CoinInfoBean coinInfoBean = coinInfoBeans.stream().filter(q->q.getSymbol().equalsIgnoreCase(symbol)).findFirst().orElse(null);
-
-            MarketInfoBean marketInfoBean = getInitMarketInfoBean(coinInfoBean,day);
-
-
-            /**
-             * 本次排名得分
-             */
-            Long rank = rankMap.get(symbol);
-            // 历史扽分
-            Long score = scoreMap.get(symbol);
-
-            if (marketInfoBeans.size() == 0 || (day - startDay == 0)) {
-                // 本次市值排名
-                score = rankFullyDilutedMarketCapMap.get(symbol);
-            }
-
-            Long sum = rank + score;
-            marketInfoBean.setCoinRanking( new Long(rank));
-            marketInfoBean.setCoinScore(sum);
-            list.add(marketInfoBean);
-        }
-
-
-        Integer batchNum = marketInfoDao.batchInsert(list);
-        log.info("  initMarketHistory   day :{}  batchNum : {} ",day,batchNum);
-    }
-
-    @Override
-    public void initMarketHistory(Long day) {
-        if(day < 20240301L){
-            log.error(" initMarketHistory 初始化程序 错误 ");
-        }
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getByDay(day);
-        if (marketInfoBeans.size() == 0) {
-            log.error(" initMarketHistory 初始化程序 错误 day :{} ", day);
-        }
-        String  markCoin =  marketInfoBeans.stream().sorted((o1,o2) ->o1.getCoinRanking().compareTo(o2.getCoinRanking())).map(q->q.getSymbol()).collect(Collectors.joining(","));
-        log.info(" initMarketHistory 获取的数据 ： {}  ",markCoin);
-        initMarketHistory(markCoin,day);
-    }
-
-    @Override
-    public void initMarketHistoryAll() {
-        //
-    }
-
-
-    private MarketInfoBean getInitMarketInfoBean(CoinInfoBean coinInfoBean,Long day){
+   @Override
+    public MarketInfoBean getInitMarketInfoBean(CoinInfoBean coinInfoBean,Long day){
         MarketInfoBean marketInfoBean = MarketInfoBean.builder()
                 .coinId(coinInfoBean.getId())
                 .day(day)
@@ -596,26 +483,17 @@ public class CollectionInfoImpl implements CollectionInfo {
 
     /**
      * coin排名与得分
-     * @param yList
+     * @param
      * @param
      */
-    private Map<String, Long> getCoinRank(List<String> yList, List<String> baseCoin, Boolean isStrictCheck) {
-
-        Map<String,Long> map = new LinkedHashMap<>();
-
-        for(Long i=0L;i<yList.size(); i++    ){
+    @Override
+    public Map<String, Long> getCoinRank(List<MarketInfoBean> markets, List<String> baseCoin, Boolean isStrictCheck) {
 
 
-            String name = yList.get(Integer.parseInt(String.valueOf(i))).toUpperCase();
-            if(!baseCoin.contains(name)){
 
-                log.error(" getCoinValue 币种没有包含 : {} ",name);
-                return null;
-            }
+        Map<String,Long> map = markets.stream().collect(Collectors.toMap(q->q.getSymbol(),o1->o1.getCoinRanking()));
 
-            map.put(name, i+1);
-        }
-        Long defaulRank = getRankByStr(yList);
+        Long defaulRank = getRankByStr(markets);
         //每个币种必须需要排序
         for(int i=0;i<baseCoin.size(); i++    ){
 
@@ -645,10 +523,11 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param markets
      * @return
      */
-    private Map<String,Long> getHistoryScore( List<MarketInfoBean> markets,List<String> baseCoin){
+    @Override
+    public Map<String,Long> getHistoryScore( List<MarketInfoBean> markets,List<String> baseCoin,Long day){
 
         Map<String,Long> map = new LinkedHashMap<>();
-        Map<Long,List<MarketInfoBean>> marketMap =  markets.stream().collect(Collectors.groupingBy(q->q.getDay()));
+        Map<Long,List<MarketInfoBean>> marketMap =  markets.stream().filter(q->q.getDay()<day).collect(Collectors.groupingBy(q->q.getDay()));
         for( Map.Entry<Long, List<MarketInfoBean>>  entry :    marketMap.entrySet()){
 
           Map<String,Long> entryMap =  entry.getValue().stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking(),(o1,o2)->o1));
@@ -735,28 +614,28 @@ public class CollectionInfoImpl implements CollectionInfo {
     /**
      * 根据list 获取
      *
-     * @param yList
+     * @param
      * @return
      */
-    private Long getRankByStr(List<String> yList) {
+    private Long getRankByStr(List<MarketInfoBean> markets) {
 
         Integer i = 0;
 
-        for (String str : yList) {
+        for (MarketInfoBean bean : markets) {
             i++;
-            if (str.equalsIgnoreCase("BTC")) {
+            if (bean.getSymbol().equalsIgnoreCase("BTC")) {
 
                 break;
             }
 
         }
 
-        double factor = new Double(i) / yList.size();
+        double factor = new Double(i) / markets.size();
 
         if (factor > defaultFactor) {
             factor = defaultFactor;
         }
-        Long index = new Double(yList.size() * (factor * 2)).longValue();
+        Long index = new Double(markets.size() * (factor * 2)).longValue();
         return index;
     }
 

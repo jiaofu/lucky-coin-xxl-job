@@ -2,6 +2,7 @@
 import com.lucky.coin.LuckyCoinXxlJobApplication;
 import com.lucky.coin.service.http.HttpFromMarketInfo;
 import com.lucky.coin.service.market.CollectionInfo;
+import com.lucky.coin.service.market.InitCoinScore;
 import com.lucky.coin.service.util.DateUtil;
 import com.lucky.coin.service.vo.http.CoinmarketcapCoinInfoVo;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class EveryTest {
 
     @Resource
     CollectionInfo collectionInfo;
+
+    @Resource
+    InitCoinScore initCoinScore;
 
     @Resource
     HttpFromMarketInfo httpFromMarketInfo;
@@ -75,7 +79,7 @@ public class EveryTest {
         baseCoins.add("ethfi");
 
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
-        collectionInfo.initSymbol(yBase);
+        initCoinScore.initSymbol(yBase);
     }
 
     @Test

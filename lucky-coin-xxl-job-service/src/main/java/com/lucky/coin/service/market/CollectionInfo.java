@@ -1,16 +1,24 @@
 package com.lucky.coin.service.market;
 
+import com.lucky.coin.dao.bean.CoinInfoBean;
+import com.lucky.coin.dao.bean.MarketInfoBean;
+import com.lucky.coin.service.vo.http.CoinFullyDilutedMarketCapVo;
+
+import java.util.List;
+import java.util.Map;
+
 public interface CollectionInfo {
 
+
+     public void initMarketRank(List<CoinFullyDilutedMarketCapVo> marketCapVos, Long day);
+
+     public List<CoinFullyDilutedMarketCapVo> getFullyMarketCap( List<String> baseCoin);
      /**
       * 检查币种
       */
      void  checkSymbol();
 
-     /**
-      * 初始化币种
-      */
-     void  initSymbol(String yBase);
+
 
      /**
       * 获取币种排名
@@ -18,19 +26,10 @@ public interface CollectionInfo {
      void getEveryCoinScore();
 
 
-     /**
-      * 初始化 market的历史数据
-      * @param symbols
-      * @param day
-      */
-     void initMarketHistory(String symbols,Long day);
+     MarketInfoBean getInitMarketInfoBean(CoinInfoBean coinInfoBean, Long day);
+     public Map<String,Long> getHistoryScore(List<MarketInfoBean> markets, List<String> baseCoin,Long day);
+
+      Map<String, Long> getCoinRank(List<MarketInfoBean> markets, List<String> baseCoin, Boolean isStrictCheck);
 
 
-     /**
-      * 初始化
-      * @param day
-      */
-     void initMarketHistory(Long day);
-
-     void initMarketHistoryAll();
 }
