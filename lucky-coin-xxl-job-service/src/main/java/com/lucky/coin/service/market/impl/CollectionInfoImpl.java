@@ -235,7 +235,8 @@ public class CollectionInfoImpl implements CollectionInfo {
 
         sb.append("开始时间：20231219 日 \n\r");
         sb.append("算力因子： " + factor + " \n\r");
-        sb.append("分类因子： " + classFactor + " \n\r");
+       // sb.append("分类因子： " + classFactor + " \n\r");
+        sb.append("组： " + baseSize + " \n\r");
 
 
 //        Integer countScore = 0;
@@ -253,21 +254,21 @@ public class CollectionInfoImpl implements CollectionInfo {
 //        sb.append("   \n\r");
 
 
-        sb.append("-----------买入区币种----------- \n\r");
+        sb.append("-----------买入区币种(成熟区)----------- \n\r");
         Integer count = 0;
         for( CoinAllInfoVo vo :    feeAddScoreList){
             count++;
 
 
             if (count == (chasing.intValue()+1)) {
-                sb.append("-----------奋进区币种----------- \n\r");
+                sb.append("-----------奋进区币种(融资区)----------- \n\r");
             }
             if (count == (observe.intValue()+1)) {
-                sb.append("-----------观察区币种----------- \n\r");
+                sb.append("-----------观察区币种(种子区)----------- \n\r");
             }
 
             if (count == (selling.intValue()+1)) {
-                sb.append("-----------预抛售区币种----------- \n\r");
+                sb.append("-----------预抛售区币种(不可以买)----------- \n\r");
             }
             if (count == (garbage.intValue()+1)) {
                 sb.append("-----------垃圾币种(立马抛售，不能犹豫)----------- \n\r");
