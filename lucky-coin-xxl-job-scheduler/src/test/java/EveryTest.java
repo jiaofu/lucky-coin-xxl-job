@@ -77,7 +77,7 @@ public class EveryTest {
         baseCoins.add("theta");
         baseCoins.add("ena");
         baseCoins.add("ethfi");
-
+        baseCoins.add("BGB");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
