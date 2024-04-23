@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.lucky.coin.service.util.Constants.classPart;
 import static com.lucky.coin.service.util.Constants.defaultFactor;
 
 
@@ -264,7 +265,7 @@ public class CollectionInfoImpl implements CollectionInfo {
                 sb.append("-----------奋进区币种(融资区)----------- \n\r");
             }
             if (count == (observe.intValue()+1)) {
-                sb.append("-----------观察区币种(种子区)----------- \n\r");
+                sb.append("-----------观察区币种(种子区(可以买了))----------- \n\r");
             }
 
             if (count == (selling.intValue()+1)) {
@@ -607,7 +608,10 @@ public class CollectionInfoImpl implements CollectionInfo {
         if (factor > defaultFactor) {
             factor = defaultFactor;
         }
-        Integer index = new Double(marketInfos.size() * (factor * 2)).intValue();
+        Integer index = new Double(marketInfos.size() * (factor * classPart)).intValue();
+        if(index - marketInfos.size() >=0){
+            index = marketInfoBeans.size()-1;
+        }
         MarketInfoBean marketInfoBean = marketInfoBeans.get(index);
         return marketInfoBean;
     }
@@ -636,7 +640,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         if (factor > defaultFactor) {
             factor = defaultFactor;
         }
-        Long index = new Double(markets.size() * (factor * 2)).longValue();
+        Long index = new Double(markets.size() * (factor * classPart)).longValue();
         return index;
     }
 

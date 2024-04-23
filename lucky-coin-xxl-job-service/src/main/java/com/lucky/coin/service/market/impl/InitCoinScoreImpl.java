@@ -100,15 +100,17 @@ public class InitCoinScoreImpl implements InitCoinScore {
             }
 
 
-            for( String symbol :    baseSymbols){
+            for( CoinInfoBean coinInfoBean :    coinInfoBeans){
 
 
+                String symbol = coinInfoBean.getSymbol();
                 MarketInfoBean marketInfoBean = marketInfoBeans.stream().filter(q->q.getDay() - day==0 && q.getSymbol().equalsIgnoreCase(symbol)).findFirst().orElse(null);
 
                 if(marketInfoBean == null){
 
                     log.error(" initMarketHistory 出现问题 symbol : {} day : {}",symbol,day);
-                    return;
+
+                    continue;
                 }
                 /**
                  * 本次排名得分

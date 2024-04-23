@@ -17,6 +17,12 @@ public class Constants {
 
     public static Long startDay = 20231219L;
 
+
+    /**
+     * 开始没有被选中，那么是第三区的观察区
+     */
+    public static Integer classPart =3;
+
     public static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
 
 }
