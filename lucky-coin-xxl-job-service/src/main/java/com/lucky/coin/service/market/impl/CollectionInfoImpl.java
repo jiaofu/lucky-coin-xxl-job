@@ -269,7 +269,7 @@ public class CollectionInfoImpl implements CollectionInfo {
             }
 
             if (count == (selling.intValue()+1)) {
-                sb.append("-----------预抛售区币种(不可以买)----------- \n\r");
+                sb.append("-----------预抛售区币种(不可以买,可以卖了)----------- \n\r");
             }
             if (count == (garbage.intValue()+1)) {
                 sb.append("-----------垃圾币种(立马抛售，不能犹豫)----------- \n\r");
