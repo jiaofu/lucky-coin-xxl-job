@@ -79,6 +79,9 @@ public class EveryTest {
         baseCoins.add("ethfi");
         baseCoins.add("BGB");
         baseCoins.add("MSN");
+        baseCoins.add("ENS");
+        baseCoins.add("YGG");
+        baseCoins.add("ID");
 
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
