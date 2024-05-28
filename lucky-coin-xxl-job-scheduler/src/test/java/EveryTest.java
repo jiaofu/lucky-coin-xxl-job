@@ -83,7 +83,7 @@ public class EveryTest {
         baseCoins.add("YGG");
         baseCoins.add("ID");
         baseCoins.add("ZENT");
-
+        baseCoins.add("CHZ");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
