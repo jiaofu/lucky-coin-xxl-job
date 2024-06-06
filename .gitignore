@@ -9,3 +9,4 @@ logs/
 /mining-sub-pool--xxl-job-scheduler/src/main/resources/application-test.yml
 /controller/src/main/resources/application-test.yml
 /lucky-coin-xxl-job-scheduler/src/main/resources/application-test.yml
+/data/
