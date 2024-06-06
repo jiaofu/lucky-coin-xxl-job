@@ -86,6 +86,7 @@ public class EveryTest {
         baseCoins.add("CHZ");
         baseCoins.add("TURBO");
         baseCoins.add("NEXT");
+        baseCoins.add("UNI");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
