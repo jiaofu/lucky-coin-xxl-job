@@ -255,30 +255,30 @@ public class CollectionInfoImpl implements CollectionInfo {
 //        sb.append("   \n\r");
 
 
-        sb.append("-----------买入区币种(成熟区)----------- \n\r");
+        sb.append("-----------买入区币种(重点关注对象)----------- \n\r");
         Integer count = 0;
         for( CoinAllInfoVo vo :    feeAddScoreList){
             count++;
 
 
             if (count == (chasing.intValue()+1)) {
-                sb.append("-----------奋进区币种(融资区)----------- \n\r");
+                sb.append("-----------奋进区币种(不能买了，可以保留仓位)----------- \n\r");
             }
             if (count == (observe.intValue()+1)) {
-                sb.append("-----------观察区币种(种子区(可以买了))----------- \n\r");
+                sb.append("-----------观察区币种(不能买了，需要评估是否保留仓位)----------- \n\r");
             }
 
             if (count == (selling.intValue()+1)) {
-                sb.append("-----------预抛售区币种(不可以买,可以卖了)----------- \n\r");
+                sb.append("-----------抛售区币种(新币种位置。有仓位只能卖出)----------- \n\r");
             }
             if (count == (garbage.intValue()+1)) {
-                sb.append("-----------垃圾币种(立马抛售，不能犹豫)----------- \n\r");
+                sb.append("-----------垃圾币种(立马抛售，不能犹豫，看都不用看)----------- \n\r");
             }
 
             sb .append( JSON.toJSONString(vo) + "\n\r ");
 
             if(vo.getSymbol().equalsIgnoreCase("BTC")){
-                sb.append(" -----------btc---------- \n\r ");
+                sb.append(" -----------btc(买入跑赢btc的币种)---------- \n\r ");
             }
         }
         log.info("  writeSymbol : \n\r{}  day :{}   排序总币种数量:{}      \n\r  ", sb, day, coinAllInfoVos.size());

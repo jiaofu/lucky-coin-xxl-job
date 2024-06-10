@@ -23,6 +23,7 @@ public class CoinInfoBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;//
     private Long day;// '日期',
+    private Integer status;// '0是显示 1是隐藏'
     private String symbol;// 'symbol',
     private String slug;// 'slug',
     private String name;// '币种名称',

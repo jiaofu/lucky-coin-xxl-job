@@ -19,6 +19,7 @@ public class CoinInfoDaoImpl implements CoinInfoDao {
     public List<CoinInfoBean> getCoinInfo() {
         Example example = new Example(CoinInfoBean.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("status",0);
 
         return mapper.selectByExample(example);
     }

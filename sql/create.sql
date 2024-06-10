@@ -26,6 +26,8 @@ CREATE TABLE `coin_info` (
 ALTER TABLE coin_info
     ADD market_cap_rank   int(11) NOT NULL COMMENT '市值排名' AFTER  coin_ranking;
 
+ALTER TABLE coin_info
+    ADD status   int(11) NOT NULL  default '0' COMMENT '状态 0使用，1使用' AFTER  symbol;
 DROP table market_info;
 
 

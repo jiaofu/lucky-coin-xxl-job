@@ -87,6 +87,10 @@ public class EveryTest {
         baseCoins.add("TURBO");
         baseCoins.add("NEXT");
         baseCoins.add("UNI");
+        baseCoins.add("PSTAKE");
+        baseCoins.add("GPT");
+        baseCoins.add("BICO");
+        baseCoins.add("RCH");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
