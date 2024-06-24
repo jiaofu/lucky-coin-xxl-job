@@ -72,7 +72,7 @@ public class EveryTest {
         baseCoins.add("rss3");
         baseCoins.add("alph");
         baseCoins.add("aevo");
-        baseCoins.add("zk");
+        baseCoins.add("zkj");
         baseCoins.add("core");
         baseCoins.add("theta");
         baseCoins.add("ena");
@@ -84,13 +84,17 @@ public class EveryTest {
         baseCoins.add("ID");
         baseCoins.add("ZENT");
         baseCoins.add("CHZ");
-        baseCoins.add("TURBO");
+     //   baseCoins.add("TURBO");
         baseCoins.add("NEXT");
         baseCoins.add("UNI");
         baseCoins.add("PSTAKE");
         baseCoins.add("GPT");
         baseCoins.add("BICO");
-        baseCoins.add("RCH");
+        baseCoins.add("ALGO");
+        baseCoins.add("ATH");
+        baseCoins.add("IO");
+        baseCoins.add("BAKE");
+
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }

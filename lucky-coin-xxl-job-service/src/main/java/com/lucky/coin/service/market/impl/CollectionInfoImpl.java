@@ -346,6 +346,10 @@ public class CollectionInfoImpl implements CollectionInfo {
 
             MarketInfoBean marketInfoBean = getInitMarketInfoBean(coinInfoBean,day);
 
+            if(capVo.getPrice() == null){
+                log.error(" capVo 获取的价格为null symbol :{}  json : {} ",capVo.getSymbol(),JSON.toJSONString(capVo));
+                return false;
+            }
             marketInfoBean.setPrice(capVo.getPrice());
             marketInfoBean.setPercentChange7d(capVo.getPercentChange7d());
             marketInfoBean.setPercentChange24h(capVo.getPercentChange24h());
