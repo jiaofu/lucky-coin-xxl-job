@@ -18,7 +18,7 @@ public class CoinAllInfoVo {
     private String symbol;
 
     @JSONField(ordinal = 2)
-    private Long coinScore;// '得分',
+    private Long sumCoinRanking;// '得分',
     @JSONField(ordinal = 3)
     private Long weekUpFee;// '排名速率',
 

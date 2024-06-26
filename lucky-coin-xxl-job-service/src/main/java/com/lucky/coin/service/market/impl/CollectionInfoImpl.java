@@ -49,29 +49,30 @@ public class CollectionInfoImpl implements CollectionInfo {
 
 
     @Override
-    public void getEveryCoinScore() {
-        Long day = DateUtil.getMinerDayBefore(0);
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(day);
+    public void getEveryCoinScore(Integer beforeDay) {
+        Long end = DateUtil.getMinerDayBefore(0);
+        Long start = DateUtil.getMinerDayBefore(beforeDay);
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(start,end);
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
-        if(marketInfoBeans.stream().filter(q->q.getDay()-day==0).count()>0){
-            log.error("  getEveryCoinScore 今日的数据已经获取到了  day : {}",day);
-            writeSymbol(day,marketInfoBeans,coinInfoBeans);
+        if(marketInfoBeans.stream().filter(q->q.getDay()-end==0).count()>0){
+            log.error("  getEveryCoinScore 今日的数据已经获取到了  day : {}",end);
+            writeSymbol(end,beforeDay,marketInfoBeans,coinInfoBeans);
             return;
         }
 
 
         List<String> getSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
         List<CoinFullyDilutedMarketCapVo> marketCapVos = getFullyMarketCap(getSymbols);
-        initMarketRank(marketCapVos,day);
-        Boolean saveMarket = handleCoinScoreByDay(marketCapVos,day);
+        initMarketRank(marketCapVos,end);
+        Boolean saveMarket = handleCoinScoreByDay(marketCapVos,start,end);
         if(!saveMarket){
             log.error(" getEveryCoinScore  没有报错，请检查  ");
             return;
         }
-        marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(day);
+        marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(start,end);
 
 
-        writeSymbol(day,marketInfoBeans,coinInfoBeans);
+        writeSymbol(end,beforeDay,marketInfoBeans,coinInfoBeans);
     }
 
     /**
@@ -80,11 +81,109 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @param marketInfoBeans
      * @param coinInfoBeans
      */
-    private void writeSymbol(  Long day, List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans){
-      //  writeSymbolScore(marketInfoBeans,day);
-        List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(marketInfoBeans,coinInfoBeans,8);
-        writeSymbolAll(rankFeeVos,marketInfoBeans,day);
+    private void writeSymbol(  Long end,Integer beforeDay, List<MarketInfoBean> marketInfoBeans,  List<CoinInfoBean> coinInfoBeans){
+        List<String> getSymbols =  coinInfoBeans.stream().map(q->q.getSymbol()).collect(Collectors.toList());
+       List<MarketInfoBean>  haveDefaultRank =  setRankSum(end,beforeDay,marketInfoBeans,getSymbols);
+        List<CoinRankFeeVo> rankFeeVos = writeSymbolRankFee(haveDefaultRank,coinInfoBeans,8);
+        writeSymbolAll(rankFeeVos,haveDefaultRank,end);
     }
+
+    /**
+     *  给 sumCoinRanking 默认值
+     * @param end
+     * @param beforeDay
+     * @param marketInfoBeans
+     */
+    private List<MarketInfoBean>  setRankSum( Long end,Integer beforeDay,List<MarketInfoBean> marketInfoBeans, List<String> getSymbols){
+        List<MarketInfoBean> result = new ArrayList();
+        Long start = DateUtil.getBeforeDay(end,beforeDay*2);
+        Map<Long,List<MarketInfoBean>>  map = marketInfoBeans.stream().collect(Collectors.groupingBy(q->q.getDay()));
+        List<MarketInfoBean> allRanks = marketInfoDao.getLessThanOrEqualTo(start,end);
+        List<MarketInfoBean> allHaveDefaultRanks =    setDefaultRank(allRanks,getSymbols);
+        List<MarketInfoBean>  find1 =  allHaveDefaultRanks.stream().filter(q->q.getDay()-20240420L==0).filter(q->q.getSymbol().equalsIgnoreCase("THETA")).collect(Collectors.toList());
+
+        for( Long keyEnd   :        map.keySet()){
+
+            Long keyStart = DateUtil.getBeforeDay(keyEnd,beforeDay);
+
+
+            List<MarketInfoBean> allDayRanks =   allHaveDefaultRanks.stream().filter(q->q.getDay()>=keyStart && q.getDay()<=keyEnd).collect(Collectors.toList());
+
+
+            for(  String symbol  :        getSymbols ){
+
+                Long sum =   allDayRanks.stream().filter(q->q.getSymbol().equalsIgnoreCase(symbol))
+                        .map(q->q.getCoinRanking()).reduce(0L,Long::sum);
+                MarketInfoBean marketInfoBean =  allDayRanks.stream().filter(q->q.getSymbol().equalsIgnoreCase(symbol)).filter(q->q.getDay()-keyEnd==0).findFirst().orElse(null);
+
+                marketInfoBean.setSumCoinRanking(sum);
+                result.add(marketInfoBean);
+            }
+
+        }
+        return result;
+
+    }
+
+    /**
+     * 所有的都给排名的值
+     * @param allDayRanks
+     * @return
+     */
+    private List<MarketInfoBean> setDefaultRank( List<MarketInfoBean> allDayRanks, List<String> getSymbols){
+        List<MarketInfoBean> marketInfoBeans = new ArrayList();
+        Map<Long,List<MarketInfoBean>>  map = allDayRanks.stream().collect(Collectors.groupingBy(q->q.getDay()));
+        for( Map.Entry<Long, List<MarketInfoBean>>  entity :        map.entrySet()){
+            for(  String symbol :         getSymbols ){
+                MarketInfoBean marketInfoBean =  entity.getValue().stream().filter(q->q.getSymbol().equalsIgnoreCase(symbol)).findFirst().orElse(null);
+
+                if(marketInfoBean == null){
+                    MarketInfoBean  marketInfoBeanBean =  getRankByDay( entity.getValue());
+                    marketInfoBean = new MarketInfoBean();
+
+                    marketInfoBean.setSymbol(symbol);
+                    marketInfoBean.setDay(entity.getKey());
+                    marketInfoBean.setCoinRanking(marketInfoBeanBean.getCoinRanking());
+                }
+                marketInfoBeans.add(marketInfoBean);
+
+            }
+        }
+        return marketInfoBeans;
+    }
+
+
+
+    /**
+     * 根据list 获取
+     *
+     * @param
+     * @return
+     */
+    private MarketInfoBean getRankByDay(List<MarketInfoBean> markets) {
+        List<MarketInfoBean> marketInfos = markets.stream().sorted((o1, o2) -> o1.getCoinRanking().compareTo(o2.getCoinRanking())).collect(Collectors.toList());
+        Integer i = 0;
+
+        for (MarketInfoBean bean : markets) {
+            i++;
+            if (bean.getSymbol().equalsIgnoreCase("BTC")) {
+
+                break;
+            }
+
+        }
+
+        double factor = new Double(i) / markets.size();
+
+        if (factor > defaultFactor) {
+            factor = defaultFactor;
+        }
+        Integer index = new Double(markets.size() * (factor * classPart)).intValue();
+        MarketInfoBean marketInfoBean  = marketInfos.get(index);
+        return marketInfoBean;
+    }
+
+
 
 
 
@@ -184,15 +283,15 @@ public class CollectionInfoImpl implements CollectionInfo {
                     CoinAllInfoVo coinRankVo = new CoinAllInfoVo();
                     coinRankVo.setSymbol(q.getSymbol());
                     coinRankVo.setWeekUpFee(0L);
-                    coinRankVo.setCoinScore(q.getCoinScore());
+                    coinRankVo.setSumCoinRanking(q.getSumCoinRanking());
                     return coinRankVo;
-                }).sorted((o1,o2)->(o1.getCoinScore().compareTo(o2.getCoinScore()))).collect(Collectors.toList());
+                }).sorted((o1,o2)->(o1.getSumCoinRanking().compareTo(o2.getSumCoinRanking()))).collect(Collectors.toList());
 
 
         Double factor = getFactor(marketInfoBeanByDay);
         Map<String,Long> rankMap =  rankFeeVos.stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getFee()));
 
-        Long perScore = (  coinAllInfoVos.get(coinAllInfoVos.size()-1).getCoinScore() -coinAllInfoVos.get(0).getCoinScore()) /
+        Long perScore = (  coinAllInfoVos.get(coinAllInfoVos.size()-1).getSumCoinRanking() -coinAllInfoVos.get(0).getSumCoinRanking()) /
                 (coinAllInfoVos.size());
         for(CoinAllInfoVo vo :    coinAllInfoVos){
             Long fee = rankMap.get(vo.getSymbol());
@@ -201,7 +300,7 @@ public class CollectionInfoImpl implements CollectionInfo {
             }
             vo.setWeekUpFee(fee);
 
-            Long coinAllInfoVo =  new Double( vo.getCoinScore()- (fee*perScore*factor) ).longValue();
+            Long coinAllInfoVo =  new Double( vo.getSumCoinRanking()- (fee*perScore*factor) ).longValue();
             vo.setFeeAddScore(coinAllInfoVo);
         }
         List<CoinAllInfoVo> feeAddScoreList =  coinAllInfoVos.stream().
@@ -299,12 +398,12 @@ public class CollectionInfoImpl implements CollectionInfo {
     /**
      * 处理每日的线上数据
      * @param marketCapVos
-     * @param day
+     * @param
      */
-    public Boolean  handleCoinScoreByDay( List<CoinFullyDilutedMarketCapVo> marketCapVos,Long day){
+    public Boolean  handleCoinScoreByDay( List<CoinFullyDilutedMarketCapVo> marketCapVos,Long start,Long end){
 
         List<CoinInfoBean> coinInfoBeans  = coinInfoDao.getCoinInfo();
-        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(day);
+        List<MarketInfoBean> marketInfoBeans = marketInfoDao.getLessThanOrEqualTo(start,end);
 
         /**
          * 从7d 行情大到小的排序
@@ -332,11 +431,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
 
 
-        Map<String,Long> scoreMap = getHistoryScore(marketInfoBeans,baseSymbols,day);
-        if( scoreMap == null){
-            log.error(" handleCoinScoreByDay 排名有错误 symbol:{} ",lastSymbolStr);
-            return false;
-        }
+
 
         List<MarketInfoBean> list = new ArrayList<>();
         Integer rank =1;
@@ -344,7 +439,7 @@ public class CollectionInfoImpl implements CollectionInfo {
 
             CoinInfoBean coinInfoBean = coinInfoBeans.stream().filter(q->q.getSymbol().equalsIgnoreCase(capVo.getSymbol())).findFirst().orElse(null);
 
-            MarketInfoBean marketInfoBean = getInitMarketInfoBean(coinInfoBean,day);
+            MarketInfoBean marketInfoBean = getInitMarketInfoBean(coinInfoBean,end);
 
             if(capVo.getPrice() == null){
                 log.error(" capVo 获取的价格为null symbol :{}  json : {} ",capVo.getSymbol(),JSON.toJSONString(capVo));
@@ -357,19 +452,15 @@ public class CollectionInfoImpl implements CollectionInfo {
             marketInfoBean.setFullyDilutedMarketCap(capVo.getFullyDilutedMarketCap());
             marketInfoBean.setLastUpdated(capVo.getLastUpdated());
 
-
-            Long score = scoreMap.get(capVo.getSymbol());
-
-            Long sum = rank +score;
             marketInfoBean.setCoinRanking( new Long(rank));
-            marketInfoBean.setCoinScore(sum);
+
             list.add(marketInfoBean);
             rank++;
         }
 
 
         Integer batchNum = marketInfoDao.batchInsert(list);
-        log.info("  handleCoinScoreByDay   day :{}  batchNum : {} ",day,batchNum);
+        log.info("  handleCoinScoreByDay   day :{}  batchNum : {} ",end,batchNum);
         if(batchNum>0){
             return true;
         }
@@ -530,10 +621,10 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @return
      */
     @Override
-    public Map<String,Long> getHistoryScore( List<MarketInfoBean> markets,List<String> baseCoin,Long day){
+    public Map<String,Long> getHistorySumRank( List<MarketInfoBean> markets,List<String> baseCoin,Long start,Long end){
 
         Map<String,Long> map = new LinkedHashMap<>();
-        Map<Long,List<MarketInfoBean>> marketMap =  markets.stream().filter(q->q.getDay()<day).collect(Collectors.groupingBy(q->q.getDay()));
+        Map<Long,List<MarketInfoBean>> marketMap =  markets.stream().filter(q->q.getDay()<end).filter(q->q.getDay()>start).collect(Collectors.groupingBy(q->q.getDay()));
         for( Map.Entry<Long, List<MarketInfoBean>>  entry :    marketMap.entrySet()){
 
           Map<String,Long> entryMap =  entry.getValue().stream().collect(Collectors.toMap(q->q.getSymbol(),t->t.getCoinRanking(),(o1,o2)->o1));
@@ -560,7 +651,7 @@ public class CollectionInfoImpl implements CollectionInfo {
                 }
 
                 
-                
+
                 Long value = map.get(baseName);
                 if(value == null){
                     value = 0L;
@@ -582,7 +673,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      */
     private Double getFactor(List<MarketInfoBean> marketInfoBeans) {
 
-        List<MarketInfoBean> marketInfos = marketInfoBeans.stream().sorted((o1, o2) -> o1.getCoinScore().compareTo(o2.getCoinScore())).collect(Collectors.toList());
+        List<MarketInfoBean> marketInfos = marketInfoBeans.stream().sorted((o1, o2) -> o1.getSumCoinRanking().compareTo(o2.getSumCoinRanking())).collect(Collectors.toList());
 
         int i = 0;
         for (MarketInfoBean vo : marketInfos) {
@@ -606,7 +697,7 @@ public class CollectionInfoImpl implements CollectionInfo {
      * @return
      */
     private MarketInfoBean getDefaultMarketInfo(List<MarketInfoBean> marketInfoBeans) {
-        List<MarketInfoBean> marketInfos = marketInfoBeans.stream().sorted((o1, o2) -> o1.getCoinScore().compareTo(o2.getCoinScore())).collect(Collectors.toList());
+        List<MarketInfoBean> marketInfos = marketInfoBeans.stream().sorted((o1, o2) -> o1.getSumCoinRanking().compareTo(o2.getSumCoinRanking())).collect(Collectors.toList());
         Double factor = getFactor(marketInfos);
 
         if (factor > defaultFactor) {

@@ -92,7 +92,7 @@ public class InitCoinScoreImpl implements InitCoinScore {
             /**
              * 历史得分
              */
-            Map<String,Long> scoreMap = collectionInfo.getHistoryScore(marketInfoBeans,baseSymbols,day);
+            Map<String,Long> scoreMap = collectionInfo.getHistorySumRank(marketInfoBeans,baseSymbols,startDay,day);
 
             if ((rankMap == null || scoreMap == null) && (day - startDay > 0)) {
                 log.error(" initMarketHistory 排名有错误 day:{} ",day);
@@ -126,7 +126,7 @@ public class InitCoinScoreImpl implements InitCoinScore {
 
                 Long sum = rank + score;
                 marketInfoBean.setCoinRanking( new Long(rank));
-                marketInfoBean.setCoinScore(sum);
+                marketInfoBean.setSumCoinRanking(sum);
                 marketInfoBean.setLastUpdated(new Date());
                 list.add(marketInfoBean);
 

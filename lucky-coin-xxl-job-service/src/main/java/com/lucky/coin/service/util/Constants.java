@@ -13,7 +13,10 @@ import java.util.Map;
  */
 public class Constants {
 
-    public static Double defaultFactor = new Double(0.25);
+    /**
+     * 5个区嘛
+     */
+    public static Double defaultFactor = new Double(0.20);
 
     public static Long startDay = 20231219L;
 

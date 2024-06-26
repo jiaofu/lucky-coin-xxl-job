@@ -53,11 +53,12 @@ public class MarketInfoDaoImpl implements MarketInfoDao {
     }
 
     @Override
-    public List<MarketInfoBean> getLessThanOrEqualTo(Long day) {
+    public List<MarketInfoBean> getLessThanOrEqualTo(Long start,Long end) {
         Example example = new Example(MarketInfoBean.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andGreaterThanOrEqualTo("day",start);
+        criteria.andLessThanOrEqualTo("day",end);
 
-        criteria.andLessThanOrEqualTo("day",day);
         return mapper.selectByExample(example);
     }
 

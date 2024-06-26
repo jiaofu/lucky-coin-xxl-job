@@ -23,11 +23,20 @@ public interface CollectionInfo {
      /**
       * 获取币种排名
       */
-     void getEveryCoinScore();
+     void getEveryCoinScore(Integer beforeDay);
 
 
      MarketInfoBean getInitMarketInfoBean(CoinInfoBean coinInfoBean, Long day);
-     public Map<String,Long> getHistoryScore(List<MarketInfoBean> markets, List<String> baseCoin,Long day);
+
+     /**
+      * 这里是根据 rank 进行排名汇总成score
+      * @param markets
+      * @param baseCoin
+      * @param start
+      * @param end
+      * @return
+      */
+     Map<String,Long> getHistorySumRank(List<MarketInfoBean> markets, List<String> baseCoin,Long start,Long end);
 
       Map<String, Long> getCoinRank(List<MarketInfoBean> markets, List<String> baseCoin, Boolean isStrictCheck);
 

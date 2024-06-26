@@ -102,7 +102,7 @@ public class EveryTest {
     @Test
     public void everyDay(){
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        collectionInfo.getEveryCoinScore();
+        collectionInfo.getEveryCoinScore(90);
         log.info("  everyDay 今日计算数据 day : {} ", DateUtil.getMinerDayBefore(0));
     }
 }

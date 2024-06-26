@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -34,12 +35,16 @@ public class MarketInfoBean {
     @Column(name = "percent_change_30d")
     private BigDecimal percentChange30d;//  '30日安价格价格',
     private Long coinRanking;//  '本次排名',
-    //private Long c
-    private Long coinScore;// '本次得分',
+
+
     private Date lastUpdated;// '行情更新时间',
     private BigDecimal fullyDilutedMarketCap; // 总市值
     private Date dbCreateTime;//数据库插入时间，请勿修改',
     private Date dbModifyTime;//'数据库更新时间，请勿修改',
+
+
+    @Transient
+    private Long sumCoinRanking;// 所有的排名
 }
 
 
