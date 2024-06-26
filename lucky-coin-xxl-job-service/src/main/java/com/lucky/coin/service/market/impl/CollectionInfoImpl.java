@@ -100,7 +100,6 @@ public class CollectionInfoImpl implements CollectionInfo {
         Map<Long,List<MarketInfoBean>>  map = marketInfoBeans.stream().collect(Collectors.groupingBy(q->q.getDay()));
         List<MarketInfoBean> allRanks = marketInfoDao.getLessThanOrEqualTo(start,end);
         List<MarketInfoBean> allHaveDefaultRanks =    setDefaultRank(allRanks,getSymbols);
-        List<MarketInfoBean>  find1 =  allHaveDefaultRanks.stream().filter(q->q.getDay()-20240420L==0).filter(q->q.getSymbol().equalsIgnoreCase("THETA")).collect(Collectors.toList());
 
         for( Long keyEnd   :        map.keySet()){
 
