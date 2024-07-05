@@ -26,6 +26,8 @@ public class Constants {
      */
     public static Integer classPart =4;
 
+
+
     public static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
 
 }

@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.lucky.coin.service.util.Constants.classPart;
+
 import static com.lucky.coin.service.util.Constants.defaultFactor;
 
 
@@ -177,7 +178,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         if (factor > defaultFactor) {
             factor = defaultFactor;
         }
-        Integer index = new Double(markets.size() * (factor * classPart)).intValue();
+        Integer index = new Double(markets.size() * (factor *  Math.E)).intValue();
         MarketInfoBean marketInfoBean  = marketInfos.get(index);
         return marketInfoBean;
     }

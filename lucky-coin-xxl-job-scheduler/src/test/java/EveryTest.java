@@ -94,7 +94,10 @@ public class EveryTest {
         baseCoins.add("ATH");
         baseCoins.add("IO");
         baseCoins.add("BAKE");
-
+        baseCoins.add("ZK");
+        baseCoins.add("MKR");
+        baseCoins.add("TWT");
+        baseCoins.add("AAVE");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
