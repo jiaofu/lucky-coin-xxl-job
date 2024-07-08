@@ -307,6 +307,8 @@ public class CollectionInfoImpl implements CollectionInfo {
                 sorted((o1,o2)->(o1.getFeeAddScore().compareTo(o2.getFeeAddScore()))).collect(Collectors.toList());
 
 
+
+        Long startDay = marketInfoBeans.stream().map(q->q.getDay()).min((o1,o2)->o1.compareTo(o2)).get();
         // 之前是取10分之9了，但是大部分币种都不跑赢btc。 98% 都是垃圾币
         // 所有应该是动态的过程,btc 跑赢大部分币种的时候，那么垃圾币种应该少
         // btc 跑输大部分币种的时候，那么垃圾币种应该多
@@ -317,6 +319,7 @@ public class CollectionInfoImpl implements CollectionInfo {
          * @param marketInfoBeans
          * @return
          */
+
 
         Double classFactor = factor;
         if (factor > defaultFactor) {
@@ -334,6 +337,7 @@ public class CollectionInfoImpl implements CollectionInfo {
         sb.append("当前时间： "+ DateUtil.getMinerDayBefore(0) +" 日\n\r");
 
         sb.append("开始时间：20231219 日 \n\r");
+        sb.append("计算时间："+startDay+ "日 \n\r");
         sb.append("算力因子： " + factor + " \n\r");
        // sb.append("分类因子： " + classFactor + " \n\r");
         sb.append("组： " + baseSize + " \n\r");
