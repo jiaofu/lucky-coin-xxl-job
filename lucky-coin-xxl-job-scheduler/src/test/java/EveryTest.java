@@ -98,6 +98,7 @@ public class EveryTest {
         baseCoins.add("MKR");
         baseCoins.add("TWT");
         baseCoins.add("AAVE");
+        baseCoins.add("CFX");
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
