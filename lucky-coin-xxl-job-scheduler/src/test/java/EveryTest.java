@@ -42,7 +42,7 @@ public class EveryTest {
     }
     @Test
     public void baseCoin(){
-        String yBaseStr ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,rndr,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,mapo,cqt,gns,trias,ator,wifi,equ,dnx,zkf,ton";
+        String yBaseStr ="btc,eth,sol,bnb,avax,arb,tia,sui,op,okb,tao,sei,pyth,imx,stx,alt,zeta,kas,olas,xai,inj,ldo,grt,ron,rune,wemix,bigtime,akt,fet,ar,sats,metis,ilv,shrap,iotx,nos,api3,magic,flux,lpt,mask,naka,mapo,cqt,gns,trias,wifi,equ,dnx,zkf,ton";
         List<String> baseCoins =  Arrays.stream(yBaseStr.split(",")).collect(Collectors.toList());
 
         baseCoins.add("pepe");
@@ -99,6 +99,10 @@ public class EveryTest {
         baseCoins.add("TWT");
         baseCoins.add("AAVE");
         baseCoins.add("CFX");
+        baseCoins.add("ZRO");
+
+        baseCoins.add("RENDER"); // rndr 升级
+
         String yBase = baseCoins.stream().collect(Collectors.joining(","));
         initCoinScore.initSymbol(yBase);
     }
@@ -106,7 +110,7 @@ public class EveryTest {
     @Test
     public void everyDay(){
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        collectionInfo.getEveryCoinScore(90);
+        collectionInfo.getEveryCoinScore(64);
         log.info("  everyDay 今日计算数据 day : {} ", DateUtil.getMinerDayBefore(0));
     }
 }
